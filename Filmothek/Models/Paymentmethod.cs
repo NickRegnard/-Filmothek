@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class Payingmethod
+    public class Paymentmethod
     {        
         public int ClientId { get; set; }
         public string PaypalPassword { get; set; }
