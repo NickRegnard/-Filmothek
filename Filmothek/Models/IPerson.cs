@@ -5,8 +5,14 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class IPerson
+    public interface IPerson
     {
         int Id;
+        string Nachname;
+        string Vorname;
+        string Addresse;
+        string Login;
+        string Pw;
+        short Berechtigung;     
     }
 }
