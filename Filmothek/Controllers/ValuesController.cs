@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Filmothek.Controllers
 {
     //edited
-    [Route("api/[controller]")]
+    [Route("home")]
     [ApiController]
     public class ValuesController : ControllerBase
     {
@@ -22,7 +22,7 @@ namespace Filmothek.Controllers
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
-            return "value";
+            return ;
         }
 
         // POST api/values
