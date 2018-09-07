@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class IPerson
+    public class IPerson //test
     {
         public int Id { get; set; }
         public string Nachname { get; set; }
@@ -16,3 +16,5 @@ namespace Filmothek.Models
         public short Berechtigung { get; set; }
     }
 }
+
+
