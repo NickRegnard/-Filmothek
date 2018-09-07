@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public interface IPerson
+    public class IPerson
     {
-        int Id;
-        string Nachname;
-        string Vorname;
-        string Addresse;
-        string Login;
-        string Pw;
-        short Berechtigung;     
+        public int Id { get; set; }
+        public string Nachname { get; set; }
+        public string Vorname { get; set; }
+        public string Addresse { get; set; }
+        public string Login { get; set; }
+        public string Pw { get; set; }
+        public short Berechtigung { get; set; }
     }
 }
