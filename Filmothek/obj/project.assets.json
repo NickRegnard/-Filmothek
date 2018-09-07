@@ -11500,23 +11500,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Marcus Doberenz\\.nuget\\packages\\": {},
+    "C:\\Users\\Nick\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projekte\\Filmothek\\Filmothek\\Filmothek.csproj",
+      "projectUniqueName": "C:\\Projecte\\Filmothek\\Filmothek\\Filmothek.csproj",
       "projectName": "Filmothek",
-      "projectPath": "C:\\Projekte\\Filmothek\\Filmothek\\Filmothek.csproj",
-      "packagesPath": "C:\\Users\\Marcus Doberenz\\.nuget\\packages\\",
-      "outputPath": "C:\\Projekte\\Filmothek\\Filmothek\\obj\\",
+      "projectPath": "C:\\Projecte\\Filmothek\\Filmothek\\Filmothek.csproj",
+      "packagesPath": "C:\\Users\\Nick\\.nuget\\packages\\",
+      "outputPath": "C:\\Projecte\\Filmothek\\Filmothek\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Marcus Doberenz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Nick\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
