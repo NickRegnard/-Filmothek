@@ -8,6 +8,9 @@ namespace Filmothek.Models
 {
     public class VideoContext : DbContext
     {
+        public VideoContext(DbContextOptions<VideoContext> options) : base(options)
+        {
 
+        }
     }
 }
