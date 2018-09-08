@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class Customer : IPerson 
-    {//edited2
+    public class Customer : Person 
+    {
     }
 }

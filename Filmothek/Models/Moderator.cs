@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class Moderator : IPerson
+    public class Moderator : Person
     {
     }
 }
