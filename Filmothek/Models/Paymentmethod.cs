@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class Paymentmethod
+    public class PaymentMethod
     {   
         [Key]
         public int ClientId { get; set; }
