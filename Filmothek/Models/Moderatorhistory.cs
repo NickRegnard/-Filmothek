@@ -10,7 +10,10 @@ namespace Filmothek.Models
     {
         [Key]
         public int Id { get; set; }
-        public int ClinetId { get; set; }
+
+        public int ModeratorId { get; set; }
+        public Moderator Moderator { get; set; }
+
         public string Activity { get; set; }
         public string Date { get; set; }
     }

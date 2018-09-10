@@ -19,6 +19,10 @@ namespace Filmothek.Models
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<PaymentMethod>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
             modelBuilder.Entity<CustomerHistory>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
@@ -34,8 +38,28 @@ namespace Filmothek.Models
             modelBuilder.Entity<Movie>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd();
+            //----------------------------------------------------------------
+            modelBuilder.Entity<Customer>()
+               .HasOne(pt => pt.PaymentMethod)
+               .WithOne(p => p.Customer)
+               .HasForeignKey<PaymentMethod>(s => s.CustomerId);
+            //----------------------------------------------------------------
+            modelBuilder.Entity<CustomerHistory>()
+                .HasOne(pt => pt.Customer)
+                .WithMany(p => p.CustomerHistory)
+                .HasForeignKey(pt => pt.CustomerId);
 
-         }
+            modelBuilder.Entity<CustomerHistory>()
+                .HasOne(pt => pt.Movie)
+                .WithMany(t => t.CustomerHistory)
+                .HasForeignKey(pt => pt.MovieId);
+            //----------------------------------------------------------------
+            modelBuilder.Entity<ModeratorHistory>()
+                .HasOne(pt => pt.Moderator)
+                .WithMany(t => t.ModeratorHistory)
+                .HasForeignKey(pt => pt.ModeratorId);
+            //----------------------------------------------------------------
+        }
 
 
 
@@ -45,8 +69,7 @@ namespace Filmothek.Models
         public DbSet<ModeratorHistory> ModeratorHistory { get; set; }
         //public DbSet<Admin> Admin { get; set; }
         public DbSet<Movie> Movie { get; set; }
-        public DbSet <PaymentMethod> PaymentMethod {get; set;}
-
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
     }
 }
 
