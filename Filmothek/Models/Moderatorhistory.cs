@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class Moderatorhistory
+    public class ModeratorHistory
     {
         [Key]
         public int Id { get; set; }
