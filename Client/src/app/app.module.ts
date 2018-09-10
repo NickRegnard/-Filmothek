@@ -3,8 +3,8 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
-// fake backend
-//import { fakeBackendProvider} from "./Interceptor/"
+//fake backend, only for testing
+import { fakeBackendProvider } from "./Interceptor/fakeBackend";
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './/app-routing.module';
@@ -14,7 +14,9 @@ import { LogoutComponent } from './logout/logout.component';
 import { AuthGuard } from "./guard/auth.guard";
 import { JwtInterceptor } from "./Interceptor/jwt.interceptor";
 import { UserService } from "./services/user.service";
-import { LoginService } from "./services/login.service"; 
+import { LoginService } from "./services/login.service";
+import { RegisterComponent } from './register/register.component';
+import { TestComponent } from './test/test.component'; 
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import { LoginService } from "./services/login.service";
     HomeComponent,
     LoginComponent,
     LogoutComponent,
+    RegisterComponent,
+    TestComponent,
 
   ],
   imports: [
@@ -32,7 +36,8 @@ import { LoginService } from "./services/login.service";
     ReactiveFormsModule,
   ],
   providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
+    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
+    fakeBackendProvider,
   ],
   bootstrap: [AppComponent]
 })

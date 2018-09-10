@@ -13,12 +13,12 @@ export class LoginService {
   constructor(private http: HttpClient) { }
 
   //TODO: change to actual path
-  private apiUrl = "api";
+  private apiUrl = "";
 
   
   //TODO: change to actual path  
   login(username: string, password: string) {
-     return this.http.post<any>(`${this.apiUrl}/actualPathHere`, { username: username, password: password })
+     return this.http.post<any>(`${this.apiUrl}/users/authenticate`, { username: username, password: password })
        .pipe(map(user => {
         	if(user && user.token) {
             localStorage.setItem("currentUser", JSON.stringify(user));
