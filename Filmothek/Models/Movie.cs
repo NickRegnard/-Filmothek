@@ -16,7 +16,7 @@ namespace Filmothek.Models
         public string Lenght { get; set; }
         public bool IsSeries { get; set; }
         public long Rating { get; set; }
-        public long Prise { get; set; }
+        public long Price { get; set; }
         public string Language { get; set; }
         public string Release { get; set; }
         public bool FSK { get; set; }
