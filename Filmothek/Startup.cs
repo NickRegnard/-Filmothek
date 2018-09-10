@@ -29,6 +29,8 @@ namespace Filmothek
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+
+            // how to code first: https://docs.microsoft.com/en-us/ef/core/get-started/aspnetcore/new-db
             //Enable use of EF /w SQL DB
             services.AddDbContext<VideoContext>(opt =>
                 opt.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmothekDB;Trusted_Connection=True;ConnectRetryCount=0")
