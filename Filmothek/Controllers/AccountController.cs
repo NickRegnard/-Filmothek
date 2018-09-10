@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Filmothek.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Filmothek.Controllers
@@ -9,8 +10,15 @@ namespace Filmothek.Controllers
     //edited
     [Route("home")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class AccountController : ControllerBase
     {
+        private readonly VideoContext _context;
+        public AccountController(VideoContext context)
+        {
+            _context = context;
+            var dbcustomer = _context.Customer.Find();
+        }
+        
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
@@ -32,9 +40,19 @@ namespace Filmothek.Controllers
         }
 
         // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        [ValidateAntiForgeryToken]
+        public IActionResult Update(string username, string password)
         {
+
+            var dbcustomer = _context.Customer.Find(username);
+            if (username == dbcustomer.Login)
+            {
+                if (password == dbcustomer.Pw)
+                {
+                    return NoContent();
+                }
+            }
         }
 
         // DELETE api/values/5
