@@ -332,6 +332,10 @@ ASALocalRun/
 .localhistory/
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 #Angular Part
 
 # See http://help.github.com/ignore-files/ for more about ignoring files.
@@ -372,4 +376,8 @@ testem.log
 
 # System Files
 .DS_Store
+<<<<<<< Updated upstream
 Thumbs.db
+=======
+Thumbs.db
+>>>>>>> Stashed changes
