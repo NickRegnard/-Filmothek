@@ -16,12 +16,8 @@ export class UserService {
   //TODO: change to actual path
   private apiUrl = "api";
 
-  //checks if user exists. Also gets PW for comparison to login
-  getLogindata(username: string): Observable<User> {
-
-    let user: Observable<User> = this.http.get<User>(this.apiUrl+"/"+username);
-    return user;  
-    
+  register(user: User) {
+    return this.http.post(`${this.apiUrl}/users/`+user.id, user);
   }
-
+  
 }
