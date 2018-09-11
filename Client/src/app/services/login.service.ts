@@ -17,7 +17,7 @@ export class LoginService {
   constructor(private http: HttpClient) { }
 
   //TODO: change to actual path
-  private apiUrl = "http://192.168.178.48:56695/api/";
+  private apiUrl = "http://localhost:50000/api/";
 
 
   //remember to kill fakeDB

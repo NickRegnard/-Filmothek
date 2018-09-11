@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Models
 {
-    public class LoginViewModel
+    public class Password
     {
+        public string password { get; set; }
+        public string username { get; set; }
     }
 }

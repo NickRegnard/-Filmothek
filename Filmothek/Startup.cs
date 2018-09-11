@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Filmothek.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace Filmothek
 {
@@ -24,52 +26,55 @@ namespace Filmothek
 
         public IConfiguration Configuration { get; }
 
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddDbContext<VideoContext>(opt =>
-                opt.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=FilmothekDB;Trusted_Connection=True;ConnectRetryCount=0"));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddEntityFrameworkStores<VideoContext>();
-            services.Configure<IdentityOptions>(options =>
+
+            //adds JWT auth
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
+                //all of the follwing need to be fulfilled for the token to be valid
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true, //Issuer is one of the listed below
+                    ValidateAudience = true, //receiver is one of the listed below
+                    ValidateLifetime = true, //hasnt expired
+                    ValidateIssuerSigningKey = true, //actual key is valid... kind of the whole point
 
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-
-                options.User.AllowedUserNameCharacters =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
+                    ValidIssuer = "http://localhost:50000",
+                    ValidAudience = "http://localhost:4200",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"))
+                };
             });
+
+            //enabling of EFC /w SQL DB
+            services.AddDbContext<VideoContext>(opt =>
+              opt.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Filmothek;Trusted_Connection=True;ConnectRetryCount=0")
+            );
         }
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseCookiePolicy();
 
+            //CORS is more a 'guideline' than a rule
+            app.UseCors(builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+
+            //required for JWT auth
             app.UseAuthentication();
 
             app.UseMvc();
         }
     }
 }
+

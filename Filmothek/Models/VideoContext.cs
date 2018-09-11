@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,8 @@ namespace Filmothek.Models
 {
     public class VideoContext : DbContext
     {
+        internal IActionResult info;
+
         public VideoContext(DbContextOptions<VideoContext> options) : base(options)
         {
 

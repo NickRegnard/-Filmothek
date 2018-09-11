@@ -11,3 +11,11 @@ namespace Filmothek.Models
         public PaymentMethod PaymentMethod { get; set; }
     }
 }
+
+//Customer customer = new Customer
+
+//  customer.LastName = //my search querz
+//    customer.Adress = asd
+//      customer.username = asdasd
+
+//      return customer;
