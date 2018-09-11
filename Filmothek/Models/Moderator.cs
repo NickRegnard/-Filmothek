@@ -7,5 +7,6 @@ namespace Filmothek.Models
 {
     public class Moderator : Person
     {
+        public List<ModeratorHistory> ModeratorHistory { get; set; }
     }
 }

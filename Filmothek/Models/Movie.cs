@@ -15,12 +15,14 @@ namespace Filmothek.Models
         public string Genre { get; set; }
         public string Lenght { get; set; }
         public bool IsSeries { get; set; }
-        public double Rating { get; set; }
-        public double Price { get; set; }
+        public float Rating { get; set; }
+        public float Price { get; set; }
         public string LanguageDub { get; set; }
         public string LanguageSub { get; set; }
         public string Release { get; set; }
         public int FSK { get; set; }
         public string Content { get; set; }
+
+        public List<CustomerHistory> CustomerHistory { get; set; }
     }
 }

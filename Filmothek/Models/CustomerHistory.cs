@@ -10,8 +10,13 @@ namespace Filmothek.Models
     {
         [Key]
         public int Id { get; set; }
+
         public int MovieId {get; set;}
+        public Movie Movie { get; set; }
+
         public int CustomerId { get; set; }
+        public Customer Customer { get; set; }
+
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public string Note { get; set; }
