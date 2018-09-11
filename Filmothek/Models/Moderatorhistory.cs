@@ -15,6 +15,6 @@ namespace Filmothek.Models
         public Moderator Moderator { get; set; }
 
         public string Activity { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
     }
 }

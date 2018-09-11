@@ -28,29 +28,30 @@ namespace Filmothek.Controllers
         {
             string UserName = User.Identity.Name;
             Customer info = new Customer();
-            //info.Id = database.Customer.Where(x => x.Login == UserName).ToInt();
             var idk = database.Customer.Where(a => a.Login == UserName).ToList();
             info.FirstName = idk[0].FirstName;
-                // info.FirstName = database.Customer.Where(x => x.Login == UserName).ToString();
             info.LastName = idk[0].LastName;
             info.Address = idk[0].Address;
             info.Login = idk[0].Login;
+            info.Id = idk[0].Id;
             return Ok(info);
 
         }
         [HttpGet("movies")]
-        public IActionResult Movies()
+        public List<Movie> Movies()
         {
-            //var UserName = User.Identity.Name;
-            //Customer info = new Customer();
-            ////info.Id = database.Customer.Where(x => x.Login == UserName).ToInt();
-            //info.FirstName = database.Customer.Where(x => x.Login == UserName).ToString();
-            //info.LastName = database.Customer.Where(x => x.Login == UserName).ToString();
-            //info.Address = database.Customer.Where(x => x.Login == UserName).ToString();
-            //info.Login = database.Customer.Where(x => x.Login == UserName).ToString();
-
-            return Ok();
-
+            return database.Movie.ToList();
+        }
+        [HttpGet("movie{id}")]
+        public ActionResult<Movie> GetById(int id)
+        {
+            var item = database.Movie.Find(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            return item;
+            //return database.Movie.ToList();
         }
 
         [HttpPost("login")]
