@@ -2,9 +2,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonModule, MatCheckboxModule } from '@angular/material';
+import {MatListModule} from '@angular/material/list';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatDividerModule} from '@angular/material/divider';
 
 //fake backend, only for testing
-import { fakeBackendProvider } from "./Interceptor/fakeBackend";
+//import { fakeBackendProvider } from "./Interceptor/fakeBackend";
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './/app-routing.module';
@@ -16,7 +21,9 @@ import { JwtInterceptor } from "./Interceptor/jwt.interceptor";
 import { UserService } from "./services/user.service";
 import { LoginService } from "./services/login.service";
 import { RegisterComponent } from './register/register.component';
-import { TestComponent } from './test/test.component'; 
+import { TestComponent } from './test/test.component';
+import { UserpageComponent } from './userpage/userpage.component'; 
+
 
 @NgModule({
   declarations: [
@@ -26,6 +33,7 @@ import { TestComponent } from './test/test.component';
     LogoutComponent,
     RegisterComponent,
     TestComponent,
+    UserpageComponent,
 
   ],
   imports: [
@@ -34,10 +42,16 @@ import { TestComponent } from './test/test.component';
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    BrowserAnimationsModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatListModule,
+    MatTabsModule,
+    MatDividerModule,
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
-    fakeBackendProvider,
+    //fakeBackendProvider,
   ],
   bootstrap: [AppComponent]
 })

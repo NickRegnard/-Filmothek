@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs'
 
 import { User } from '../Models/user';
-import { Observable } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +16,18 @@ export class UserService {
   ) { }
 
   //TODO: change to actual path
-  private apiUrl = "api";
+  private apiUrl = "http://192.168.178.48:56695/api/";
+
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(this.apiUrl+"user")
+    //.pipe(catchError(this.handleError('', {}) //implement an error handler
+  }
 
   register(user: User) {
     return this.http.post(`${this.apiUrl}/users/`+user.id, user);
   }
   
+  /* error handerl
+  private handleError(???)
+  */
 }

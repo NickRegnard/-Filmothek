@@ -11,9 +11,10 @@ import { LoginService } from '../services/login.service';
 export class JwtInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    //adds the token
+    //get token from localStorage
     let currentUser= JSON.parse(localStorage.getItem("currentUser"));
 
+    //add token to request
     if (currentUser && currentUser.token) {
       request = request.clone({
         setHeaders: {

@@ -7,6 +7,7 @@ import { LoginComponent } from './login/login.component';
 import { LogoutComponent } from './logout/logout.component';
 import { RegisterComponent} from './register/register.component';
 import { TestComponent} from './test/test.component';
+import { UserpageComponent } from './userpage/userpage.component';
 
 const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -14,6 +15,7 @@ const routes: Routes = [
     { path: 'logout', component: LogoutComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'test', component: TestComponent, canActivate: [AuthGuard]},
+    { path: 'myPage', component: UserpageComponent, canActivate: [AuthGuard]},
     { path: '**', redirectTo: '/home', pathMatch: 'full' },
 ]
 
