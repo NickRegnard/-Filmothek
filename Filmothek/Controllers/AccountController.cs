@@ -42,22 +42,31 @@ namespace Filmothek.Controllers
         {
             return database.Movie.ToList();
         }
-        ///commmitry
         [HttpGet("movie{id}")]
         public ActionResult<Movie> GetById(int id)
         {
-            var item = database.Movie.Find(id);
-            if (item == null)
+            var movie = database.Movie.Find(id);
+            if (movie == null)
             {
                 return NotFound();
             }
-            return item;
+            return movie;
+        }
+        [HttpGet("movie{name}")]
+        public ActionResult<Movie> GetByName(string Mname)
+        {
+            var movie = database.Movie.Find(Mname);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            return movie;
         }
 
         [HttpPost("login")]
         public IActionResult Login(Password values)
         {
-            //habs nicht verstanden... variable ist username von values vom file Password :D
+            //hab nicht verstanden... variable ist username von values vom file Password :D
             var claims = new Claim[]
             {
                 new Claim(ClaimTypes.Name, values.username),
