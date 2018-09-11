@@ -51,7 +51,6 @@ namespace Filmothek.Controllers
                 return NotFound();
             }
             return item;
-            //return database.Movie.ToList();
         }
 
         [HttpPost("login")]
