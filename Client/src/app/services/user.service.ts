@@ -24,7 +24,7 @@ export class UserService {
   }
 
   register(user: User) {
-    return this.http.post(`${this.apiUrl}/users/`+user.id, user);
+    return this.http.post(`${this.apiUrl}users/`+user.id, user);
   }
   
   /* error handerl

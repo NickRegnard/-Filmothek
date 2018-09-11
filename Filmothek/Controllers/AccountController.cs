@@ -62,7 +62,6 @@ namespace Filmothek.Controllers
             }
             return movie;
         }
-
         [HttpPost("login")]
         public IActionResult Login(Password values)
         {
@@ -93,6 +92,26 @@ namespace Filmothek.Controllers
             }
 
             return Unauthorized();
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAsync(Account values)
+        {
+            //hab nicht verstanden... variable ist username von values vom file Password :D
+            var x = database.Customer.Find();
+            var y = database.Moderator.Find();
+            if (!(values.Username == x.Login )|| !(values.Username == y.Login))
+            {
+                var newUser = new Customer() {
+                    LastName = values.LastName,
+                    FirstName = values.FirstName,
+                    Address = values.Address,
+                    Login = values.Username,
+                    Pw = values.Password
+                };
+                database.Add(newUser);
+                await database.SaveChangesAsync();
+            }
+            return NoContent();
         }
 
 
