@@ -9,7 +9,6 @@ namespace Filmothek.Models
 {
     public class VideoContext : DbContext
     {
-        internal IActionResult info;
 
         public VideoContext(DbContextOptions<VideoContext> options) : base(options)
         {

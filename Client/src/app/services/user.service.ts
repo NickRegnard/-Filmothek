@@ -14,9 +14,9 @@ export class UserService {
   constructor(
     private http: HttpClient,
   ) { }
-
+  
   //TODO: change to actual path
-  private apiUrl = "http://localhost:50000/api/";
+  private apiUrl = "http://localhost:60000/api/";
 
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(this.apiUrl+"user")

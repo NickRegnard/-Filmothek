@@ -18,26 +18,27 @@ namespace Filmothek.Controllers
     public class AccountController : ControllerBase
     {
         private readonly VideoContext database;
-        
-        AccountController(VideoContext context)
+
+        public AccountController(VideoContext context)
         {
             database = context;
         }
-        [HttpGet("user"), AllowAnonymous]
+        [HttpGet("user")]
         public IActionResult Userdata()
         {
-            var UserName = User.Identity.Name;
+            string UserName = User.Identity.Name;
             Customer info = new Customer();
             //info.Id = database.Customer.Where(x => x.Login == UserName).ToInt();
-            info.FirstName = database.Customer.Where(x => x.Login == UserName).ToString();
-            info.LastName = database.Customer.Where(x => x.Login == UserName).ToString();
-            info.Address = database.Customer.Where(x => x.Login == UserName).ToString();
-            info.Login = database.Customer.Where(x => x.Login == UserName).ToString();
-
+            var idk = database.Customer.Where(a => a.Login == UserName).ToList();
+            info.FirstName = idk[0].FirstName;
+                // info.FirstName = database.Customer.Where(x => x.Login == UserName).ToString();
+            info.LastName = idk[0].LastName;
+            info.Address = idk[0].Address;
+            info.Login = idk[0].Login;
             return Ok(info);
 
         }
-        [HttpGet("movies"), AllowAnonymous]
+        [HttpGet("movies")]
         public IActionResult Movies()
         {
             //var UserName = User.Identity.Name;
@@ -70,7 +71,7 @@ namespace Filmothek.Controllers
                 var tokeOptions = new JwtSecurityToken(
                 issuer: "http://localhost:50000",
                 audience: "http://localhost:4200",
-                claims: new List<Claim>(),
+                claims: claims,
                 expires: DateTime.Now.AddMinutes(120),
                 signingCredentials: signinCredentials
                 );
