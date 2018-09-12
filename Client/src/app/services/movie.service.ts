@@ -21,16 +21,4 @@ export class MovieService {
   getMovieById(id:number): Observable<Movie> {
     return this.http.get<Movie>(AppSettings.apiUrl+`movie${id}`)
   }
-
-  addMovie(movie: Movie): Observable<Movie> {
-    return this.http.post<Movie>(AppSettings.apiUrl+`createMovie`, movie, AppSettings.httpOptions);
-  }
-
-  editMovie(movie: Movie, id:number): Observable<Movie> {
-    return this.http.put<Movie>(AppSettings.apiUrl+`updateMovie${id}`, movie, AppSettings.httpOptions);
-  }
-
-  BorrowMovie(movie: Movie): Observable<Movie> {
-    return this.http.post<Movie>(AppSettings.apiUrl+`Borrow`, movie.id, AppSettings.httpOptions);
-  }
 }

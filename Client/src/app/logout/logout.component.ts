@@ -19,7 +19,7 @@ export class LogoutComponent implements OnInit {
 
     setTimeout(() => {
       this.router.navigate(['/home']);
-    }, 2000);
+    }, 5000);
   }
 
 }
