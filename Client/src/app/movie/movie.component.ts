@@ -10,7 +10,7 @@ import { Movie } from '../Models/movie';
 export class MovieComponent implements OnInit {
 
   movie: Movie[];
-  m = this.movie[0];
+  //m = this.movie[0];
 
   constructor(
     private movieService: MovieService, 
