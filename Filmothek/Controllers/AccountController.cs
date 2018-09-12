@@ -36,7 +36,7 @@ namespace Filmothek.Controllers
             return Ok(info);
 
         }
-        [HttpGet("movies")]
+       /[HttpGet("movies")]
         public List<Movie> Movies()
         {
             return database.Movie.ToList();
@@ -95,16 +95,23 @@ namespace Filmothek.Controllers
         [HttpGet("payment")]
         public ActionResult Payment()
         {
-            string UserName = User.Identity.Name;
+            string UserName = "SamWills"; //User.Identity.Name;
             Customer findPayment = new Customer();
             var findCustomer = database.Customer.Where(y => UserName == y.Login).ToList();
             //findPayment.Login = findCustomer[0].Login;
-            PaymentMethod findPaymentdata = new PaymentMethod();
-            findPayment.Login = findCustomer[0].Login;
-            return Ok(findPayment);
+            Paymentmask findPaymentdata = new Paymentmask();
+            var findPaymentList = database.PaymentMethod.Where(y => findCustomer[0].Id == y.CustomerId).ToList();
+            findPaymentdata.fromPaymentMethod(findPaymentList[0]);            
+            /*var findPayment = new PaymentMethod();
+            findPayment.CreditcardExpire = "2020-02-01";
+            findPayment.CreditcardNumber = 1234000012340000;
+            findPayment.CreditcardOwner = "asd dsa";
+            findPayment.CreditcardSecret = 123;
+            findPayment.CreditcardTyp = "VISA";*/
+            return Ok(findPaymentdata);
         }
         [HttpPost("addpayment")]
-        public async Task<IActionResult> AddPaymentMethod(Paymentmask values)
+        public async Task<IActionResult> AddPaymentMethod(PaymentMethod values)
         {
             string UserName = User.Identity.Name;
             Customer info = new Customer();

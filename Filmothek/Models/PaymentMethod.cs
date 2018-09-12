@@ -22,5 +22,6 @@ namespace Filmothek.Models
         public string BankaccIBAN { get; set; }
 
         public Customer Customer { get; set; }
+
     }
 }
