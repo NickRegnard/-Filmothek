@@ -23,10 +23,7 @@ export class PaymentInfoComponent implements OnInit {
   getPayment() {
     console.log('x');
     this.userService.getPayment()
-      .subscribe(x => {
-       
-        this.payment = x.data;   
-      });
+      .subscribe(x => {this.payment = x});
   }
 
 }
