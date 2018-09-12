@@ -28,11 +28,7 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             Customer info = new Customer();
             var idk = database.Customer.Where(a => a.Login == UserName).ToList();
-            info.FirstName = idk[0].FirstName;
-            info.LastName = idk[0].LastName;
-            info.Address = idk[0].Address;
-            info.Login = idk[0].Login;
-            info.Id = idk[0].Id;
+            info = idk[0];
             return Ok(info);
 
         }
