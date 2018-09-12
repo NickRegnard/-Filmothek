@@ -96,9 +96,8 @@ namespace Filmothek.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync(Account values)
         {
-            //hab nicht verstanden... variable ist username von values vom file Password :D
-            var x = database.Customer.Find();
-            var y = database.Moderator.Find();
+            var x = database.Customer.Find(values.Username);
+            var y = database.Moderator.Find(values.Username);
             if (!(values.Username == x.Login )|| !(values.Username == y.Login))
             {
                 var newUser = new Customer() {
