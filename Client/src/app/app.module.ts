@@ -7,6 +7,7 @@ import { MatButtonModule, MatCheckboxModule } from '@angular/material';
 import {MatListModule} from '@angular/material/list';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatDividerModule} from '@angular/material/divider';
+import { MatCardModule } from '@angular/material/card';
 
 //fake backend, only for testing
 //import { fakeBackendProvider } from "./Interceptor/fakeBackend";
@@ -22,7 +23,9 @@ import { UserService } from "./services/user.service";
 import { LoginService } from "./services/login.service";
 import { RegisterComponent } from './register/register.component';
 import { TestComponent } from './test/test.component';
-import { UserpageComponent } from './userpage/userpage.component'; 
+import { UserpageComponent } from './userpage/userpage.component';
+import { MovieComponent } from './movie/movie.component'; 
+
 
 
 @NgModule({
@@ -34,6 +37,7 @@ import { UserpageComponent } from './userpage/userpage.component';
     RegisterComponent,
     TestComponent,
     UserpageComponent,
+    MovieComponent,
 
   ],
   imports: [
@@ -48,6 +52,7 @@ import { UserpageComponent } from './userpage/userpage.component';
     MatListModule,
     MatTabsModule,
     MatDividerModule,
+    MatCardModule,
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
