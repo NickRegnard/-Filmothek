@@ -99,15 +99,20 @@ namespace Filmothek.Controllers
             return Ok(findHistory);
         }
         [HttpGet("payment")]
-        public ActionResult Payment()
+        public IActionResult Payment()
         {
             string UserName = User.Identity.Name;
             Customer findPayment = new Customer();
             var findCustomer = database.Customer.Where(y => UserName == y.Login).ToList();
             //findPayment.Login = findCustomer[0].Login;
             PaymentMethod findPaymentdata = new PaymentMethod();
-            findPayment.Login = findCustomer[0].Login;
-            return Ok(findPayment);
+
+            var findPaymentList = database.PaymentMethod.Where(y => findCustomer[0].Id == y.CustomerId).ToList();
+
+            //findPaymentdata.CustomerId = findCustomer[0].Id;
+            findPaymentdata = findPaymentList[0];
+
+            return Ok(findPaymentdata);
         }
         [HttpPost("addpayment")]
         public async Task<IActionResult> AddPaymentMethod(Paymentmask values)

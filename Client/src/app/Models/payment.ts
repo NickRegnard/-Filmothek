@@ -5,7 +5,9 @@ export class Payment {
   creditcardOwner: string;
   creditcardNumber: number;
   creditcardSecret: number;
-  creditcardExpire: string;
+//  creditcardExpire: string;
   bankaccOwner: string;
   bankaccIBAN: string;
+  id:number;
+  customerId:number;
 }

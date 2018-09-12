@@ -32,7 +32,7 @@ export class UserService {
   }
 
   getPayment(): Observable<Payment> {
-    return this.http.get<Payment>(`${AppSettings.apiUrl}payment`)
+    return this.http.get<Payment>(`${AppSettings.apiUrl}payment`);
   }
 
   // /** POST: add a new hero to the server */
