@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Filmothek.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Filmothek.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Filmothek.Controllers
 {
@@ -93,6 +92,17 @@ namespace Filmothek.Controllers
 
             return Unauthorized();
         }
+        [HttpGet("payment")]
+        public ActionResult Payment()
+        {
+            string UserName = User.Identity.Name;
+            Customer findPayment = new Customer();
+            var findCustomer = database.Customer.Where(y => UserName == y.Login).ToList();
+            //findPayment.Login = findCustomer[0].Login;
+            PaymentMethod findPaymentdata = new PaymentMethod();
+            findPayment.Login = findCustomer[0].Login;
+            return Ok(findPayment);
+        }
         [HttpPost("addpayment")]
         public async Task<IActionResult> AddPaymentMethod(Paymentmask values)
         {
@@ -114,18 +124,17 @@ namespace Filmothek.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(Account values)
         {
-            var x = database.Customer.Find(values.Login);
-            var y = database.Moderator.Find(values.Login);
-            if (!(values.Login == x.Login )|| !(values.Login == y.Login))
+            if (!(database.Customer.Any(y => values.Login == y.Login)) || (!(database.Moderator.Any(y => values.Login == y.Login))))
             {
                 var newUser = new Customer() {
                     LastName = values.LastName,
                     FirstName = values.FirstName,
                     Address = values.Address,
                     Login = values.Login,
-                    Pw = values.Pw
+                    Pw = values.Pw,
+                    Rights = 1
                 };
-                database.Add(newUser);
+                database.Customer.Add(newUser);
                 await database.SaveChangesAsync();
             }
             return NoContent();
