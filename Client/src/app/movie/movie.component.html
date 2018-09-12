@@ -9,14 +9,14 @@
     <mat-card-content>
       <p>{{m.content}}</p>
     </mat-card-content>
-    <mat-card-footer>Length: {{m.length}}</mat-card-footer>
-    <mat-card-footer>User Rating: {{m.rating}}</mat-card-footer>
-    <mat-card-footer>Language: {{m.languageDub}}</mat-card-footer>
-    <mat-card-footer>Subtitles: {{m.languageSub}}</mat-card-footer>
-    <mat-card-footer>FSK: {{m.fsk}}</mat-card-footer>
-    <mat-card-actions>
-      <button mat-button>rent for {{m.price}}</button>
-    </mat-card-actions>
+    <mat-card-footer style="float:left">
+      <p>Length: {{m.length}}min</p>
+      <p>User Rating: {{m.rating}}</p>
+      <p>Language: {{m.languageDub}}</p>
+      <p>Subtitles: {{m.languageSub}}</p>
+      <p>FSK: {{m.fsk}}</p>
+      <p>{{m.price}}</p>
+    </mat-card-footer>
   </div>
 </mat-card>
   
