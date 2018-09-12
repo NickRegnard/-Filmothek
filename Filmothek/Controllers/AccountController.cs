@@ -28,13 +28,8 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             Customer info = new Customer();
             var idk = database.Customer.Where(a => a.Login == UserName).ToList();
-            info.FirstName = idk[0].FirstName;
-            info.LastName = idk[0].LastName;
-            info.Address = idk[0].Address;
-            info.Login = idk[0].Login;
-            info.Id = idk[0].Id;
+            info = idk[0];
             return Ok(info);
-
         }
         [HttpGet("movies")]
         public List<Movie> Movies()
@@ -91,6 +86,17 @@ namespace Filmothek.Controllers
             }
 
             return Unauthorized();
+        }
+        [HttpGet("history")]
+        public ActionResult CustomerHistory()
+        {
+            string UserName = User.Identity.Name;
+            Customer findHistory = new Customer();
+            var findCustomer = database.Customer.Where(y => UserName == y.Login).ToList();
+            //findPayment.Login = findCustomer[0].Login;
+            CustomerHistory findPaymentdata = new CustomerHistory();
+            findHistory.Login = findCustomer[0].Login;
+            return Ok(findHistory);
         }
         [HttpGet("payment")]
         public ActionResult Payment()
