@@ -52,15 +52,14 @@ namespace Filmothek.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     MovieName = table.Column<string>(nullable: true),
                     Genre = table.Column<string>(nullable: true),
-                    Lenght = table.Column<string>(nullable: true),
+                    Lenght = table.Column<int>(nullable: true),
                     IsSeries = table.Column<bool>(nullable: false),
-                    Language = table.Column<string>(nullable: true),
-                    Rating = table.Column<double>(nullable: false),
-                    Price = table.Column<double>(nullable: false),
+                    Rating = table.Column<float>(nullable: true),
+                    Price = table.Column<float>(nullable: true),
                     LanguageDub = table.Column<string>(nullable: true),
                     LanguageSub = table.Column<string>(nullable: true),
-                    Release = table.Column<string>(nullable: true),
-                    FSK = table.Column<int>(nullable: false),
+                    Release = table.Column<DateTime>(nullable: false),
+                    FSK = table.Column<int>(nullable: true),
                     Content = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -79,8 +78,8 @@ namespace Filmothek.Migrations
                     PaypalLogin = table.Column<string>(nullable: true),
                     CreditcardTyp = table.Column<string>(nullable: true),
                     CreditcardOwner = table.Column<string>(nullable: true),
-                    CreditcardNumber = table.Column<long>(nullable: false),
-                    CreditcardSecret = table.Column<int>(nullable: false),
+                    CreditcardNumber = table.Column<long>(nullable: true),
+                    CreditcardSecret = table.Column<int>(nullable: true),
                     CreditcardExpire = table.Column<string>(nullable: true),
                     BankaccOwner = table.Column<string>(nullable: true),
                     BankaccIBAN = table.Column<string>(nullable: true)
@@ -104,7 +103,7 @@ namespace Filmothek.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ModeratorId = table.Column<int>(nullable: false),
                     Activity = table.Column<string>(nullable: true),
-                    Date = table.Column<string>(nullable: true)
+                    Date = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {

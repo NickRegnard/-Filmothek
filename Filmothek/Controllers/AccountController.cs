@@ -114,16 +114,16 @@ namespace Filmothek.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(Account values)
         {
-            var x = database.Customer.Find(values.Username);
-            var y = database.Moderator.Find(values.Username);
-            if (!(values.Username == x.Login )|| !(values.Username == y.Login))
+            var x = database.Customer.Find(values.Login);
+            var y = database.Moderator.Find(values.Login);
+            if (!(values.Login == x.Login )|| !(values.Login == y.Login))
             {
                 var newUser = new Customer() {
                     LastName = values.LastName,
                     FirstName = values.FirstName,
                     Address = values.Address,
-                    Login = values.Username,
-                    Pw = values.Password
+                    Login = values.Login,
+                    Pw = values.Pw
                 };
                 database.Add(newUser);
                 await database.SaveChangesAsync();

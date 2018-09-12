@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Filmothek.Migrations
 {
     [DbContext(typeof(VideoContext))]
-    [Migration("20180910102251_InitialCreate")]
+    [Migration("20180912085428_Initial-Create")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,7 @@ namespace Filmothek.Migrations
 
                     b.Property<string>("Activity");
 
-                    b.Property<string>("Date");
+                    b.Property<DateTime>("Date");
 
                     b.Property<int>("ModeratorId");
 
@@ -121,27 +121,25 @@ namespace Filmothek.Migrations
 
                     b.Property<string>("Content");
 
-                    b.Property<int>("FSK");
+                    b.Property<int?>("FSK");
 
                     b.Property<string>("Genre");
 
                     b.Property<bool>("IsSeries");
 
-                    b.Property<string>("Language");
-
                     b.Property<string>("LanguageDub");
 
                     b.Property<string>("LanguageSub");
 
-                    b.Property<string>("Lenght");
+                    b.Property<int?>("Lenght");
 
                     b.Property<string>("MovieName");
 
-                    b.Property<double>("Price");
+                    b.Property<float?>("Price");
 
-                    b.Property<double>("Rating");
+                    b.Property<float?>("Rating");
 
-                    b.Property<string>("Release");
+                    b.Property<DateTime>("Release");
 
                     b.HasKey("Id");
 
@@ -160,11 +158,11 @@ namespace Filmothek.Migrations
 
                     b.Property<string>("CreditcardExpire");
 
-                    b.Property<long>("CreditcardNumber");
+                    b.Property<long?>("CreditcardNumber");
 
                     b.Property<string>("CreditcardOwner");
 
-                    b.Property<int>("CreditcardSecret");
+                    b.Property<int?>("CreditcardSecret");
 
                     b.Property<string>("CreditcardTyp");
 
