@@ -52,7 +52,7 @@ namespace Filmothek.Controllers
             }
             return movie;
         }
-        [HttpGet("movie{name}")]
+        [HttpGet("movie{id}", Name = "")]
         public ActionResult<Movie> GetByName(string Mname)
         {
             var movie = database.Movie.Find(Mname);
@@ -93,8 +93,26 @@ namespace Filmothek.Controllers
 
             return Unauthorized();
         }
+        //[HttpPost("addpayment")]
+        //public async Task<IActionResult> AddPaymentMethod(Paymentmask values)
+        //{
+        //    //string UserName = User.Identity.Name;
+        //    //Customer info = new Customer();
+        //    //var idk = database.Customer.Where(a => a.Login == UserName).ToList();
+        //    //if (!(info.Id == idk[0].Id))
+        //    //{
+        //    //    var check = database.PaymentMethod;
+        //    //    if (!(check.Find(values.CustomerId).CustomerId == values.CustomerId))
+        //    //    {
+
+        //    //    }
+
+        //    }
+        //    return NoContent();
+           
+        //}
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync(Account values)
+        public async Task<IActionResult> Register(Account values)
         {
             var x = database.Customer.Find(values.Username);
             var y = database.Moderator.Find(values.Username);
