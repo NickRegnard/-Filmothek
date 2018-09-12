@@ -93,24 +93,24 @@ namespace Filmothek.Controllers
 
             return Unauthorized();
         }
-        //[HttpPost("addpayment")]
-        //public async Task<IActionResult> AddPaymentMethod(Paymentmask values)
-        //{
-        //    //string UserName = User.Identity.Name;
-        //    //Customer info = new Customer();
-        //    //var idk = database.Customer.Where(a => a.Login == UserName).ToList();
-        //    //if (!(info.Id == idk[0].Id))
-        //    //{
-        //    //    var check = database.PaymentMethod;
-        //    //    if (!(check.Find(values.CustomerId).CustomerId == values.CustomerId))
-        //    //    {
+        [HttpPost("addpayment")]
+        public async Task<IActionResult> AddPaymentMethod(Paymentmask values)
+        {
+            string UserName = User.Identity.Name;
+            Customer info = new Customer();
+            var idk = database.Customer.Where(a => a.Login == UserName).ToList();
+            if (!(info.Id == idk[0].Id))
+            {
+                var check = database.PaymentMethod.Find(idk[0].Id);
+                if (!(check.CustomerId == values.CustomerId))
+                {
 
-        //    //    }
+                }
+                return Ok(idk);
+            }
+            return NoContent();
 
-        //    }
-        //    return NoContent();
-           
-        //}
+        }
         [HttpPost("register")]
         public async Task<IActionResult> Register(Account values)
         {
