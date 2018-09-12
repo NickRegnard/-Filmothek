@@ -27,7 +27,7 @@ export class UserService {
   }
 
   register(user: User): Observable<User> {
-    return this.http.post<User>(`${AppSettings.apiUrl}users/`, user, httpOptions);
+    return this.http.post<User>(`${AppSettings.apiUrl}register/`, user, httpOptions);
   }
 
   // /** POST: add a new hero to the server */
