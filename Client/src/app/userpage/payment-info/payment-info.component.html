@@ -1,0 +1,16 @@
+<h3>Credit Card:</h3>
+<!--<mat-list NgIf="!(payment.type == null)"> -->
+<mat-list>
+    <mat-divider></mat-divider>
+    <mat-list-item>Type: {{payment.creditcardTyp}}</mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>Number: {{payment.creditcardNumber}}</mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>Security Number: {{payment.creditcardSecret}}</mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>Expires: {{payment.creditcardExpire}}</mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>Name: {{payment.creditcardOwner}}</mat-list-item>
+    <mat-divider></mat-divider>
+</mat-list>
+

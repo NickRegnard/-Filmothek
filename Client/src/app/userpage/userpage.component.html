@@ -1,22 +1,9 @@
 <mat-tab-group>
   <mat-tab label="Personal Data">
-    <h2> Welcome, {{user.firstName}} {{user.lastName}}</h2>
-    <mat-list>
-      <mat-divider></mat-divider>
-      <mat-list-item>Username: {{user.login}}</mat-list-item>
-      <mat-divider></mat-divider>
-      <mat-list-item>Last Name: {{user.firstName}}</mat-list-item>
-      <mat-divider></mat-divider>
-      <mat-list-item>First Name: {{user.lastName}}</mat-list-item>
-      <mat-divider></mat-divider>
-      <mat-list-item>Adress: {{user.address}}</mat-list-item>
-      <mat-divider></mat-divider>
-      <mat-list-item>Your User Id: {{user.id}}</mat-list-item>
-      <mat-divider></mat-divider>
-    </mat-list>
+      <app-account-info></app-account-info>
   </mat-tab>
   <mat-tab label="Payment Information">
-    payment info
+    <app-payment-info></app-payment-info>
   </mat-tab>
   <mat-tab label="Settings">
     stuff

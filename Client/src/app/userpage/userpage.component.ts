@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { UserService } from '../services/user.service';
 import { User } from '../Models/user';
+import { Payment } from '../Models/payment';
 
 
 
@@ -12,18 +13,19 @@ import { User } from '../Models/user';
 })
 export class UserpageComponent implements OnInit {
 
-  user: User
+ //user: User;
+ //payment: Payment;
 
   constructor(
-    private userService: UserService,
+    //private userService: UserService,
   ) { }
 
   ngOnInit() {
-    this.getUser();
+    //this.getUser();
   }
 
-  getUser(): void {
+  /*getUser(): void {
     this.userService.getCurrentUser()
       .subscribe(x => this.user = x);
-  }
+  }*/
 }
