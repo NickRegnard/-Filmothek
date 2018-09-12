@@ -24,7 +24,9 @@ import { LoginService } from "./services/login.service";
 import { RegisterComponent } from './register/register.component';
 import { TestComponent } from './test/test.component';
 import { UserpageComponent } from './userpage/userpage.component';
-import { MovieComponent } from './movie/movie.component'; 
+import { MovieComponent } from './movie/movie.component';
+import { AccountInfoComponent } from './userpage/account-info/account-info.component';
+import { PaymentInfoComponent } from './userpage/payment-info/payment-info.component'; 
 
 
 
@@ -38,6 +40,8 @@ import { MovieComponent } from './movie/movie.component';
     TestComponent,
     UserpageComponent,
     MovieComponent,
+    AccountInfoComponent,
+    PaymentInfoComponent,
 
   ],
   imports: [

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 
 import { User } from '../Models/user';
 import { AppSettings } from '../appSettings';
+import { Payment } from '../Models/payment';
 
 
 const httpOptions = {
@@ -28,6 +29,10 @@ export class UserService {
 
   register(user: User): Observable<User> {
     return this.http.post<User>(`${AppSettings.apiUrl}register`, user, httpOptions);
+  }
+
+  getPayment(): Observable<Payment> {
+    return this.http.get<Payment>(`${AppSettings.apiUrl}payment`)
   }
 
   // /** POST: add a new hero to the server */
