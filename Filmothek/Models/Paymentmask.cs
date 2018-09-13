@@ -2,7 +2,7 @@
 
 namespace Filmothek.Controllers
 {
-    public class Paymentmask
+    public class PaymentMask
     {
         public string PaypalPassword { get; set; }
         public string PaypalLogin { get; set; }
@@ -16,18 +16,6 @@ namespace Filmothek.Controllers
 
         public void fromPaymentMethod(PaymentMethod value)
         {
-            /*Paymentmask returnValue = new Paymentmask();
-            returnValue.BankaccIBAN = value.BankaccIBAN;
-            returnValue.BankaccOwner = value.BankaccOwner;
-            returnValue.CreditcardExpire = value.CreditcardExpire;
-            returnValue.CreditcardOwner = value.CreditcardOwner;
-            returnValue.CreditcardSecret = value.CreditcardSecret;
-            returnValue.CreditcardTyp = value.CreditcardTyp;
-            returnValue.CreditcardNumber = value.CreditcardNumber;
-            returnValue.PaypalLogin = value.PaypalLogin;
-            returnValue.PaypalPassword = value.PaypalPassword;*/
-
-     
             this.BankaccIBAN = value.BankaccIBAN;
             this.BankaccOwner = value.BankaccOwner;
             this.CreditcardExpire = value.CreditcardExpire;
