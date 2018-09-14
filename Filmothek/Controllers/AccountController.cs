@@ -164,10 +164,37 @@ namespace Filmothek.Controllers
         {
             if (database.CustomerHistory.Any(x => x.isBorrowing == false))
             {
-                var findMovie = await database.CustomerHistory.FindAsync(id);
+                string UserName = User.Identity.Name;
+                var findMovie = await database.CustomerHistory.FindAsync(id, UserName);
                 database.CustomerHistory.Remove(findMovie);
                 await database.SaveChangesAsync();
             }
+            return NoContent();
+        }
+        [HttpPost("note{id}")]
+        public async Task<IActionResult> Note(string text, int id)
+        {
+            string UserName = User.Identity.Name;
+            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
+            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser[0].Id).ToList();
+            var addNote = new CustomerHistory();
+            addNote.Id = findActivity[0].Id;
+            addNote.Note = text;
+            database.CustomerHistory.Update(addNote);
+            await database.SaveChangesAsync();
+            return NoContent();
+        }
+        [HttpPost("deleteNote{id}")]
+        public async Task<IActionResult> DeleteNote(int id)
+        {
+            string UserName = User.Identity.Name;
+            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
+            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser[0].Id).ToList();
+            var deleteNote = new CustomerHistory();
+            deleteNote.Id = findActivity[0].Id;
+            deleteNote.Note = "";
+            database.CustomerHistory.Update(deleteNote);
+            await database.SaveChangesAsync();
             return NoContent();
         }
         [HttpGet("history")]
