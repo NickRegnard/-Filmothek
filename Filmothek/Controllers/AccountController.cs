@@ -155,7 +155,7 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
-        [HttpDelete("deleteMovie")]
+        [HttpDelete("deleteMovie/{id}")]
         public async Task<IActionResult> DeleteMovie(Movie mDetails, int id)
         {
             string UserName = User.Identity.Name;
