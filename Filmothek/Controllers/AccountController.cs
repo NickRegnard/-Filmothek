@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Filmothek.Controllers
         {
             database = context;
         }
-        
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(Account values)
         {
@@ -66,8 +67,9 @@ namespace Filmothek.Controllers
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-
-                return Ok(new { Token = tokenString });
+                var findUser = database.Customer.Where(a => a.Login == values.username).FirstOrDefault();
+                int permission = findUser.Rights;
+                return Ok(new { Token = tokenString, permission });
 
             }
 
@@ -78,8 +80,8 @@ namespace Filmothek.Controllers
         {
             string UserName = User.Identity.Name;
             Customer info = new Customer();
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
-            info = findUser[0];
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            info = findUser;
             return Ok(info);
 
         }
@@ -87,9 +89,9 @@ namespace Filmothek.Controllers
         public async Task<IActionResult> EditUserdataAsync(string password, string address)
         {
             string UserName = User.Identity.Name;
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
             var info = new Customer();
-            info.Id = findUser[0].Id;
+            info.Id = findUser.Id;
             if (password != "")
                 info.Pw = password;
             if (address != "")
@@ -97,12 +99,11 @@ namespace Filmothek.Controllers
             database.Customer.Update(info);
             await database.SaveChangesAsync();
             return NoContent();
-
         }
         [HttpGet("movies")]
         public List<Movie> Movies() => database.Movie.ToList();
 
-        [HttpGet("movie{id}")]
+        [HttpGet("movie/{id}")]
         public ActionResult<Movie> GetById(int id)
         {
             var movie = database.Movie.Find(id);
@@ -112,57 +113,132 @@ namespace Filmothek.Controllers
             }
             return movie;
         }
-        [HttpGet("movie{id}", Name = "")]
+        [HttpPost("addMovie")]
+        public async Task<IActionResult> AddMovie(Movie mDetails)
+        {
+            string UserName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == UserName))
+            {
+                var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+                if (!(database.Movie.Any(x => x == mDetails)))
+                {
+                    Movie newMovie = new Movie();
+                    newMovie = mDetails;
+                    database.Movie.Add(newMovie);
+                    await database.SaveChangesAsync();
+                    ModeratorHistory newActivity = new ModeratorHistory();
+                    newActivity.ModeratorId = findUser.Id;
+                    newActivity.Activity = String.Format("Moderator {0} added a new movie with Id {1} and {2} on {3}.", findUser.Login, newMovie.Id, newMovie.MovieName, DateTime.Now);
+                    newActivity.Date = DateTime.Now;
+                }
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpPut("editMovie")]
+        public async Task<IActionResult> EditMovie(Movie mDetails, int id)
+        {
+            string UserName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == UserName))
+            {
+                var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+                var findMovie = database.Movie.Where(a => a.Id == id).FirstOrDefault();
+                findMovie = mDetails;
+                findMovie.Id = id;
+                database.Movie.Update(findMovie);
+                await database.SaveChangesAsync();
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findUser.Id;
+                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findUser.Login, findMovie.Id, findMovie.MovieName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpDelete("deleteMovie")]
+        public async Task<IActionResult> DeleteMovie(Movie mDetails, int id)
+        {
+            string UserName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == UserName))
+            {
+                var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+                var findMovie = await database.Movie.FindAsync(id);
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findUser.Id;
+                newActivity.Activity = String.Format("Moderator {0} deleted a movie with Id {1} and {2} on {3}.", findUser.Login, findMovie.Id, findMovie.MovieName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                database.Movie.Remove(findMovie);
+                await database.SaveChangesAsync();
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpGet("searchmovie/{id}")]
         public ActionResult<Movie> GetByName(string Mname)
         {
             var movie = database.Movie.Find(Mname);
-            if (movie == null)
-            {
-                return NotFound();
-            }
-            return movie;
+            return movie == null ? (ActionResult<Movie>)NotFound() : (ActionResult<Movie>)movie;
         }
-        [HttpPost("rentMoive{id}")]
-        public async Task<IActionResult> RentMovie(int id)
+        [HttpGet("check/{id}")]
+        public ActionResult<Movie> CheckMovie(string Mname, int id)
         {
             string UserName = User.Identity.Name;
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
-            var findMovie = database.Movie.Where(a => a.Id == id).ToList();
-            var newHistory = new CustomerHistory()
+            var FindUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            var MovieEntries = database.CustomerHistory.Where(a => a.CustomerId == FindUser.Id && a.MovieId == id).FirstOrDefault();
+            bool available = false;
+            if (database.CustomerHistory.Any(x => x.IsBorrowing == true && x.MovieId == id))
             {
-                MovieId = findMovie[0].Id,
-                CustomerId = findUser[0].Id,
-                startDate = DateTime.Now,
-                endDate = DateTime.Now.AddDays(30),
-                isBorrowing = true
-            };
-            database.CustomerHistory.Add(newHistory);
-            await database.SaveChangesAsync();
+                if ((MovieEntries.StartDate < DateTime.Now) && (MovieEntries.EndDate > DateTime.Now))
+                {
+                    available = true;
+                }
+            }
+            return Ok(available);
+        }
+        [HttpPost("rent")]
+        public async Task<IActionResult> RentMovie([FromBody]int id)
+        {
+            string UserName = User.Identity.Name;
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            var findMovie = database.Movie.Where(a => a.Id == id).FirstOrDefault();
+            if (!(database.CustomerHistory.Any(a => a.MovieId == findMovie.Id) && !(database.CustomerHistory.Any(b => b.CustomerId == findUser.Id))))
+            {
+                var newHistory = new CustomerHistory()
+                {
+                    MovieId = findMovie.Id,
+                    CustomerId = findUser.Id,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(30),
+                    IsBorrowing = true
+                };
+                database.CustomerHistory.Add(newHistory);
+                await database.SaveChangesAsync();
+            }
             return NoContent();
 
         }
-        [HttpPost("addwishlist{id}")]
+        [HttpPost("addWishlist/{id}")]
         public async Task<IActionResult> AddToWishlist(int id)
         {
             string UserName = User.Identity.Name;
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
-            var findMovie = database.Movie.Where(a => a.Id == id).ToList();
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            var findMovie = database.Movie.Where(a => a.Id == id).FirstOrDefault();
             var newHistory = new CustomerHistory()
             {
-                MovieId = findMovie[0].Id,
-                CustomerId = findUser[0].Id,
-                startDate = DateTime.Now,
-                isBorrowing = false
+                MovieId = findMovie.Id,
+                CustomerId = findUser.Id,
+                StartDate = DateTime.Now,
+                IsBorrowing = false
             };
             database.CustomerHistory.Add(newHistory);
             await database.SaveChangesAsync();
             return NoContent();
 
         }
-        [HttpDelete("deletewishlist{id}")]
+        [HttpDelete("deletewishlist/{id}")]
         public async Task<IActionResult> DeleteWishlistMovie(int id)
         {
-            if (database.CustomerHistory.Any(x => x.isBorrowing == false))
+            if (database.CustomerHistory.Any(x => x.IsBorrowing == false))
             {
                 string UserName = User.Identity.Name;
                 var findMovie = await database.CustomerHistory.FindAsync(id, UserName);
@@ -171,62 +247,55 @@ namespace Filmothek.Controllers
             }
             return NoContent();
         }
-        [HttpPost("note{id}")]
+        [HttpPost("note/{id}")]
         public async Task<IActionResult> Note(string text, int id)
         {
             string UserName = User.Identity.Name;
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
-            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser[0].Id).ToList();
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser.Id).FirstOrDefault();
             var addNote = new CustomerHistory();
-            addNote.Id = findActivity[0].Id;
+            addNote.Id = findActivity.Id;
             addNote.Note = text;
             database.CustomerHistory.Update(addNote);
             await database.SaveChangesAsync();
             return NoContent();
         }
-        [HttpPost("deleteNote{id}")]
+        [HttpPost("deleteNote/{id}")]
         public async Task<IActionResult> DeleteNote(int id)
         {
             string UserName = User.Identity.Name;
-            var findUser = database.Customer.Where(a => a.Login == UserName).ToList();
-            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser[0].Id).ToList();
+            var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            var findActivity = database.CustomerHistory.Where(x => x.MovieId == id && x.CustomerId == findUser.Id).FirstOrDefault();
             var deleteNote = new CustomerHistory();
-            deleteNote.Id = findActivity[0].Id;
+            deleteNote.Id = findActivity.Id;
             deleteNote.Note = "";
             database.CustomerHistory.Update(deleteNote);
             await database.SaveChangesAsync();
             return NoContent();
         }
         [HttpGet("history")]
-        public List<CustomerHistory> ShowHistory() => database.CustomerHistory.Where(x => x.isBorrowing == true).ToList();
+        public List<CustomerHistory> ShowHistory() => database.CustomerHistory.Where(x => x.IsBorrowing == true).ToList();
 
         [HttpGet("wishlist")]
-        public List<CustomerHistory> ShowWishlist() => database.CustomerHistory.Where(x => x.isBorrowing == false).ToList();
+        public List<CustomerHistory> ShowWishlist() => database.CustomerHistory.Where(x => x.IsBorrowing == false).ToList();
 
         [HttpGet("payment")]
         public ActionResult Payment()
         {
-            string UserName = "SamWills"; //User.Identity.Name;
+            string UserName = User.Identity.Name;
             Customer findPayment = new Customer();
-            var findCustomer = database.Customer.Where(y => UserName == y.Login).ToList();
-            //findPayment.Login = findCustomer[0].Login;
+            var findCustomer = database.Customer.Where(y => UserName == y.Login).FirstOrDefault();
             PaymentMask findPaymentdata = new PaymentMask();
-            var findPaymentList = database.PaymentMethod.Where(y => findCustomer[0].Id == y.CustomerId).ToList();
-            findPaymentdata.fromPaymentMethod(findPaymentList[0]);            
-            /*var findPayment = new PaymentMethod();
-            findPayment.CreditcardExpire = "2020-02-01";
-            findPayment.CreditcardNumber = 1234000012340000;
-            findPayment.CreditcardOwner = "asd dsa";
-            findPayment.CreditcardSecret = 123;
-            findPayment.CreditcardTyp = "VISA";*/
+            var findPaymentList = database.PaymentMethod.Where(y => findCustomer.Id == y.CustomerId).FirstOrDefault();
+            findPaymentdata.fromPaymentMethod(findPaymentList);
             return Ok(findPaymentdata);
         }
         [HttpPost("addpayment")]
         public async Task<IActionResult> AddPaymentMethod(PaymentMethod values)
         {
             string UserName = User.Identity.Name;
-            var idk = database.Customer.Where(a => a.Login == UserName).ToList();
-            if (!(database.PaymentMethod.Any((y => idk[0].Id == y.CustomerId))))
+            var idk = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            if (!(database.PaymentMethod.Any((y => idk.Id == y.CustomerId))))
             {
                 var newPaymentMethod = new PaymentMethod();
                 newPaymentMethod = values;
@@ -235,31 +304,13 @@ namespace Filmothek.Controllers
             }
             else
             {
-                var newPaymentMethod = new PaymentMethod() { CustomerId = idk[0].Id };
-                var thing = database.PaymentMethod.ToList();
-                foreach (var x in thing)
-                {
-                    switch (x)
-                    {
-                        case null:
-                            break;
-                        default:
-                            newPaymentMethod = x;
-                            break;
-                    }
-                }                
-                database.PaymentMethod.Update(newPaymentMethod);
+                var findPaymentMethod = database.PaymentMethod.Where(x => x.CustomerId == idk.Id).FirstOrDefault();
+                findPaymentMethod = values;
+                findPaymentMethod.CustomerId = idk.Id;
+                database.PaymentMethod.Update(findPaymentMethod);
                 await database.SaveChangesAsync();
             }
             return NoContent();
-        }
-        
-
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }
