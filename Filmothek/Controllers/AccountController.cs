@@ -498,20 +498,32 @@ namespace Filmothek.Controllers
         public IActionResult GetCustomerHistory()
         {
             string UserName = User.Identity.Name;
+            if (UserName == null) return NoContent();
             var findId = database.Customer.FirstOrDefault(x => x.Login == UserName);
             var findHistory = database.CustomerHistory.Where(x => x.IsBorrowing == true || findId.Id == x.CustomerId).ToList();
+            if (findHistory == null) return NoContent();
             List<CustomerHistorymask> History = new List<CustomerHistorymask>(findHistory.Count);
-            int i = 0;
-            for (i=0; i<findHistory.Count;i++)
+            for (int i=0; i<findHistory.Count;i++)
             {
                 string MovieName = database.Movie.FirstOrDefault(x => x.Id == findHistory[i].MovieId).MovieName;
                 CustomerHistorymask tempHistory = new CustomerHistorymask(findHistory[i].Id, MovieName, findHistory[i].StartDate, findHistory[i].EndDate);
                 History.Add(tempHistory);
-               /* History[i].Id = findHistory[i].Id;
-                History[i].MovieId = findHistory[i].MovieId;
-                History[i].StartDate = findHistory[i].StartDate;
-                History[i].EndDate = findHistory[i].EndDate;*/
+            }
 
+            return Ok(History);
+        }
+
+        [HttpGet("history/{id}")]
+        public IActionResult GetCustomerHistoryById(int id)
+        {
+            var findHistory = database.CustomerHistory.Where(x => id == x.CustomerId || x.IsBorrowing == true).ToList();
+            if (findHistory == null) return NoContent();
+            List<CustomerHistorymask> History = new List<CustomerHistorymask>(findHistory.Count);
+            for(int i=0;i<findHistory.Count;i++)
+            {
+                string MovieName = database.Movie.FirstOrDefault(x => x.Id == findHistory[i].MovieId).MovieName;
+                CustomerHistorymask tempHistory = new CustomerHistorymask(findHistory[i].Id, MovieName, findHistory[i].StartDate, findHistory[i].EndDate);
+                History.Add(tempHistory);
             }
 
             return Ok(History);
