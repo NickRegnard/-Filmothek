@@ -92,6 +92,14 @@ namespace Filmothek.Controllers
 
         }
 
+        [HttpGet("allUsers")]
+        public IActionResult GetAllUsers()
+        {
+            var Customers = database.Customer.ToList();
+            List<User> Users = new List<User>();
+            return Ok(Users);
+        }
+
         //edit PW and Address of user
         [HttpPost("edituser")]
         public async Task<IActionResult> EditUserdataAsync(string password, string address)
