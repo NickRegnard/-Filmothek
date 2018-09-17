@@ -13,7 +13,7 @@ namespace Filmothek.Models
         public int Id { get; set; }
         public string MovieName { get; set; }
         public string Genre { get; set; }
-        public int? Lenght { get; set; }
+        public int? Length { get; set; }
         public bool IsSeries { get; set; }
         public float? Rating { get; set; }
         public float? Price { get; set; }

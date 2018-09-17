@@ -24,6 +24,8 @@ namespace Filmothek.Controllers
             database = context;
         }
 
+
+        //Registering a new User
         [HttpPost("register")]
         public async Task<IActionResult> Register(Account values)
         {
@@ -43,6 +45,8 @@ namespace Filmothek.Controllers
             }
             return NoContent();
         }
+
+        //Login
         [HttpPost("login")]
         public IActionResult Login(Password values)
         {
@@ -75,6 +79,8 @@ namespace Filmothek.Controllers
 
             return Unauthorized();
         }
+
+        //send info about logged in user
         [HttpGet("user")]
         public IActionResult Userdata()
         {
@@ -85,6 +91,8 @@ namespace Filmothek.Controllers
             return Ok(info);
 
         }
+
+        //edit PW and Address of user
         [HttpPost("edituser")]
         public async Task<IActionResult> EditUserdataAsync(string password, string address)
         {
@@ -100,9 +108,12 @@ namespace Filmothek.Controllers
             await database.SaveChangesAsync();
             return NoContent();
         }
+
+        //get List of all movies
         [HttpGet("movies")]
         public List<Movie> Movies() => database.Movie.ToList();
 
+        //get single movie by ID
         [HttpGet("movie/{id}")]
         public ActionResult<Movie> GetById(int id)
         {
@@ -113,6 +124,8 @@ namespace Filmothek.Controllers
             }
             return movie;
         }
+
+        //add a new movie to the DB
         [HttpPost("addMovie")]
         public async Task<IActionResult> AddMovie(Movie mDetails)
         {
@@ -135,6 +148,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //edit a movie on the db, requires mod permission
         [HttpPut("editMovie")]
         public async Task<IActionResult> EditMovie(Movie mDetails, int id)
         {
@@ -155,6 +170,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //delete a movie on the db, requires mod permission
         [HttpDelete("deleteMovie/{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
@@ -173,6 +190,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //edit a customer by a mod
         [HttpPut("editCusomter/{id}")]
         public async Task<IActionResult> EditCustomer(Customer cInfo, int id)
         {
@@ -193,6 +212,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //delete a customer by a mod
         [HttpDelete("deleteCustomer/{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -211,6 +232,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //return full mod log, accesible by admin only
         [HttpGet("moderatorHistory")]
         public List<ModeratorHistory> ShowModeratorHistory()
         {
@@ -223,6 +246,8 @@ namespace Filmothek.Controllers
             }
             return new List<ModeratorHistory>();
         }
+
+        //create new mod
         [HttpPost("registerMod")]
         public async Task<IActionResult> RegisterModerator(Account values)
         {
@@ -247,6 +272,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //edit a mod
         [HttpPut("editModerator/{id}")]
         public async Task<IActionResult> EditModerator(Moderator cInfo, int id)
         {
@@ -267,6 +294,8 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //delete a mod
         [HttpDelete("deleteModerator/{id}")]
         public async Task<IActionResult> DeleteModerator(int id)
         {
@@ -285,12 +314,16 @@ namespace Filmothek.Controllers
             }
             return Unauthorized();
         }
+
+        //return movies by searchparameter name
         [HttpGet("searchmovie/{id}")]
         public ActionResult<Movie> GetByName(string Mname)
         {
             var movie = database.Movie.Find(Mname);
             return movie == null ? (ActionResult<Movie>)NotFound() : (ActionResult<Movie>)movie;
         }
+
+        //Customer check if a movie is rented by them
         [HttpGet("check/{id}")]
         public ActionResult<Movie> CheckMovie(string Mname, int id)
         {
@@ -307,6 +340,8 @@ namespace Filmothek.Controllers
             }
             return Ok(available);
         }
+
+        //borrow a movie
         [HttpPost("rent")]
         public async Task<IActionResult> RentMovie([FromBody]int id)
         {
@@ -329,6 +364,8 @@ namespace Filmothek.Controllers
             return NoContent();
 
         }
+
+        //add a movie to the current wishlist
         [HttpPost("addWishlist/{id}")]
         public async Task<IActionResult> AddToWishlist(int id)
         {
@@ -347,6 +384,8 @@ namespace Filmothek.Controllers
             return NoContent();
 
         }
+
+        //Customer: delete a wishlist entry
         [HttpDelete("deletewishlist/{id}")]
         public async Task<IActionResult> DeleteWishlistMovie(int id)
         {
@@ -359,6 +398,8 @@ namespace Filmothek.Controllers
             }
             return NoContent();
         }
+
+
         [HttpPost("note/{id}")]
         public async Task<IActionResult> Note(string text, int id)
         {
@@ -385,12 +426,36 @@ namespace Filmothek.Controllers
             await database.SaveChangesAsync();
             return NoContent();
         }
+
+
         [HttpGet("history")]
-        public List<CustomerHistory> ShowHistory() => database.CustomerHistory.Where(x => x.IsBorrowing == true).ToList();
+        public IActionResult GetCustomerHistory()
+        {
+            string UserName = User.Identity.Name;
+            var findId = database.Customer.FirstOrDefault(x => x.Login == UserName);
+            var findHistory = database.CustomerHistory.Where(x => x.IsBorrowing == true || findId.Id == x.CustomerId).ToList();
+            List<CustomerHistorymask> History = new List<CustomerHistorymask>(findHistory.Count);
+            int i = 0;
+            for (i=0; i<findHistory.Count;i++)
+            {
+                string MovieName = database.Movie.FirstOrDefault(x => x.Id == findHistory[i].MovieId).MovieName;
+                CustomerHistorymask tempHistory = new CustomerHistorymask(findHistory[i].Id, MovieName, findHistory[i].StartDate, findHistory[i].EndDate);
+                History.Add(tempHistory);
+               /* History[i].Id = findHistory[i].Id;
+                History[i].MovieId = findHistory[i].MovieId;
+                History[i].StartDate = findHistory[i].StartDate;
+                History[i].EndDate = findHistory[i].EndDate;*/
+
+            }
+
+            return Ok(History);
+        }
 
         [HttpGet("wishlist")]
         public List<CustomerHistory> ShowWishlist() => database.CustomerHistory.Where(x => x.IsBorrowing == false).ToList();
 
+
+        //Customer: view receive payment info
         [HttpGet("payment")]
         public ActionResult Payment()
         {
@@ -402,6 +467,8 @@ namespace Filmothek.Controllers
             findPaymentdata.fromPaymentMethod(findPaymentList);
             return Ok(findPaymentdata);
         }
+
+        //Customer: edit payment info
         [HttpPost("addpayment")]
         public async Task<IActionResult> AddPaymentMethod(PaymentMethod values)
         {
@@ -423,6 +490,8 @@ namespace Filmothek.Controllers
                 await database.SaveChangesAsync();
             }
             return NoContent();
+
+
         }
     }
 }
