@@ -287,7 +287,7 @@ namespace Filmothek.Controllers
                 newActivity.Date = DateTime.Now;
                 database.Customer.Remove(findUser);
                 await database.SaveChangesAsync();
-                return NoContent();
+                return RedirectToAction();
             }
             return Unauthorized();
         }
