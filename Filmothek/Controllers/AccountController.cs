@@ -76,6 +76,25 @@ namespace Filmothek.Controllers
                 return Ok(new { Token = tokenString, permission });
 
             }
+            else if (database.Moderator.Any((y => values.username == y.Login && values.password == y.Pw)))
+            {
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
+                var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+                var tokeOptions = new JwtSecurityToken(
+                issuer: "http://localhost:50000",
+                audience: "http://localhost:4200",
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(120),
+                signingCredentials: signinCredentials
+                );
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+                var findUser = database.Moderator.Where(a => a.Login == values.username).FirstOrDefault();
+                int permission = findUser.Rights;
+                return Ok(new { Token = tokenString, permission });
+
+            }
 
             return Unauthorized();
         }
@@ -140,17 +159,19 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName))
             {
-                var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+                var findUser = database.Moderator.Where(a => a.Login == UserName).FirstOrDefault();
                 if (!(database.Movie.Any(x => x == mDetails)))
                 {
                     Movie newMovie = new Movie();
                     newMovie = mDetails;
+                    //ModeratorHistory newActivity = new ModeratorHistory();
+                    //newActivity.ModeratorId = findUser.Id;
+                    //newActivity.Activity = String.Format("Moderator {0} added a new movie with Id {1} and {2} on {3}.", findUser.Login, newMovie.Id, newMovie.MovieName, DateTime.Now);
+                    //newActivity.Date = DateTime.Now;
                     database.Movie.Add(newMovie);
                     await database.SaveChangesAsync();
-                    ModeratorHistory newActivity = new ModeratorHistory();
-                    newActivity.ModeratorId = findUser.Id;
-                    newActivity.Activity = String.Format("Moderator {0} added a new movie with Id {1} and {2} on {3}.", findUser.Login, newMovie.Id, newMovie.MovieName, DateTime.Now);
-                    newActivity.Date = DateTime.Now;
+                    //database.ModeratorHistory.Add(newActivity);
+                    //await database.SaveChangesAsync();
                 }
                 return NoContent();
             }
