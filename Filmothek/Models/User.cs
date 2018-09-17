@@ -22,5 +22,13 @@ namespace Filmothek.Models
             this.Address = Customer.Address;
             this.Login = Customer.Login;
         }
+        public User(Moderator Moderator)
+        {
+            this.Id = Moderator.Id;
+            this.LastName = Moderator.LastName;
+            this.FirstName = Moderator.FirstName;
+            this.Address = Moderator.Address;
+            this.Login = Moderator.Login;
+        }
     }
 }

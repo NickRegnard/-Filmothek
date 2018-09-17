@@ -109,7 +109,7 @@ namespace Filmothek.Controllers
             return Ok(info);
         }
         [HttpGet("user/{id}")]
-        public IActionResult UserById([FromBody]int id)
+        public IActionResult UserById(int id)
         {
             var findUser = database.Customer.FirstOrDefault(x => x.Id == id);
             User user = new User(findUser);
@@ -130,6 +130,19 @@ namespace Filmothek.Controllers
             return Ok(Users);
         }
 
+        [HttpGet("allAdmins")]
+        public IActionResult GetAllAdmins()
+        {
+            var Admins = database.Moderator.ToList();
+            List<User> Users = new List<User>();
+            for (int i = 0; i < Admins.Count; i++)
+            {
+                User user = new User(Admins[i]);
+                Users.Add(user);
+            }
+            return Ok(Users);
+        }
+
         //edit PW and Address of user
         [HttpPost("edituser")]
         public async Task<IActionResult> EditUserdataAsync(string password, string address)
@@ -145,6 +158,12 @@ namespace Filmothek.Controllers
             database.Customer.Update(info);
             await database.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpPost("editUserAdmin")]
+        public async Task<IActionResult> EditForeignUserData(User user)
+        {
+            
         }
 
         //get List of all movies
