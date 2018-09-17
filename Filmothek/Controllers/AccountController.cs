@@ -156,7 +156,7 @@ namespace Filmothek.Controllers
             return Unauthorized();
         }
         [HttpDelete("deleteMovie/{id}")]
-        public async Task<IActionResult> DeleteMovie(Movie mDetails, int id)
+        public async Task<IActionResult> DeleteMovie(int id)
         {
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName))
@@ -168,6 +168,118 @@ namespace Filmothek.Controllers
                 newActivity.Activity = String.Format("Moderator {0} deleted a movie with Id {1} and {2} on {3}.", findUser.Login, findMovie.Id, findMovie.MovieName, DateTime.Now);
                 newActivity.Date = DateTime.Now;
                 database.Movie.Remove(findMovie);
+                await database.SaveChangesAsync();
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpPut("editCusomter/{id}")]
+        public async Task<IActionResult> EditCustomer(Customer cInfo, int id)
+        {
+            string modLogin = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modLogin))
+            {
+                var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
+                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
+                findUser = cInfo;
+                findUser.Id = id;
+                database.Customer.Update(findUser);
+                await database.SaveChangesAsync();
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findModerator.Id;
+                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpDelete("deleteCustomer/{id}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            string modLogin = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modLogin))
+            {
+                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
+                var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findModerator.Id;
+                newActivity.Activity = String.Format("Moderator {0} deleted a user with Id {1} and {2} {3} on {4}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                database.Customer.Remove(findUser);
+                await database.SaveChangesAsync();
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpGet("moderatorHistory")]
+        public List<ModeratorHistory> ShowModeratorHistory()
+        {
+            string modName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modName && database.Moderator.Any(y => y.Rights == 3)))
+            {
+                var findMod = database.Moderator.Where(a => a.Login == modName).FirstOrDefault();
+                var history = database.ModeratorHistory.Where(x => x.ModeratorId == findMod.Id).ToList();
+                return history;
+            }
+            return new List<ModeratorHistory>();
+        }
+        [HttpPost("registerMod")]
+        public async Task<IActionResult> RegisterModerator(Account values)
+        {
+            string modName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modName && database.Moderator.Any(y => y.Rights == 3)))
+            {
+                if (!(database.Customer.Any(y => values.Login == y.Login)) || (!(database.Moderator.Any(y => values.Login == y.Login))))
+                {
+                    var newUser = new Moderator()
+                    {
+                        LastName = values.LastName,
+                        FirstName = values.FirstName,
+                        Address = values.Address,
+                        Login = values.Login,
+                        Pw = values.Pw,
+                        Rights = 2
+                    };
+                    database.Moderator.Add(newUser);
+                    await database.SaveChangesAsync();
+                }
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpPut("editModerator/{id}")]
+        public async Task<IActionResult> EditModerator(Moderator cInfo, int id)
+        {
+            string modLogin = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modLogin && database.Moderator.Any(y => y.Rights == 3)))
+            {
+                var findUser = database.Moderator.Where(a => a.Id == id).FirstOrDefault();
+                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
+                findUser = cInfo;
+                findUser.Id = id;
+                database.Moderator.Update(findUser);
+                await database.SaveChangesAsync();
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findModerator.Id;
+                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                return NoContent();
+            }
+            return Unauthorized();
+        }
+        [HttpDelete("deleteModerator/{id}")]
+        public async Task<IActionResult> DeleteModerator(int id)
+        {
+            string modLogin = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == modLogin && database.Moderator.Any(y => y.Rights == 3)))
+            {
+                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
+                var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
+                ModeratorHistory newActivity = new ModeratorHistory();
+                newActivity.ModeratorId = findModerator.Id;
+                newActivity.Activity = String.Format("Moderator {0} deleted a user with Id {1} and {2} {3} on {4}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
+                newActivity.Date = DateTime.Now;
+                database.Customer.Remove(findUser);
                 await database.SaveChangesAsync();
                 return NoContent();
             }
