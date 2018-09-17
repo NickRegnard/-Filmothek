@@ -163,7 +163,14 @@ namespace Filmothek.Controllers
         [HttpPost("editUserAdmin")]
         public async Task<IActionResult> EditForeignUserData(User user)
         {
-            
+            var databaseEntry = database.Customer.FirstOrDefault(x => x.Id == user.Id);
+            databaseEntry.LastName = user.LastName;
+            databaseEntry.FirstName = user.FirstName;
+            databaseEntry.Login = user.Login;
+            databaseEntry.Address = user.Address;
+            database.Customer.Update(databaseEntry);
+            await database.SaveChangesAsync();
+            return Ok();
         }
 
         //get List of all movies
