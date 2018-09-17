@@ -16,7 +16,11 @@ namespace Filmothek.Models
         public User() { }
         public User(Customer Customer)
         {
-            this.Id = Customer
+            this.Id = Customer.Id;
+            this.LastName = Customer.LastName;
+            this.FirstName = Customer.FirstName;
+            this.Address = Customer.Address;
+            this.Login = Customer.Login;
         }
     }
 }

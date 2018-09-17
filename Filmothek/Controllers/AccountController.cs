@@ -104,18 +104,29 @@ namespace Filmothek.Controllers
         public IActionResult Userdata()
         {
             string UserName = User.Identity.Name;
-            Customer info = new Customer();
             var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
-            info = findUser;
+            User info = new User(findUser);
             return Ok(info);
-
         }
+        [HttpGet("user/{id}")]
+        public IActionResult UserById([FromBody]int id)
+        {
+            var findUser = database.Customer.FirstOrDefault(x => x.Id == id);
+            User user = new User(findUser);
+            return Ok(user);
+        }
+
 
         [HttpGet("allUsers")]
         public IActionResult GetAllUsers()
         {
             var Customers = database.Customer.ToList();
             List<User> Users = new List<User>();
+            for(int i=0;i<Customers.Count;i++)
+            {
+                User user = new User(Customers[i]);
+                Users.Add(user);
+            }
             return Ok(Users);
         }
 
