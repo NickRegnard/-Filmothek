@@ -1,4 +1,5 @@
 ﻿using Filmothek.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -14,7 +15,7 @@ namespace Filmothek.Controllers
 {
     //edited
     [Route("api")]
-    [ApiController]
+    [ApiController, Authorize]
     public class AccountController : ControllerBase
     {
         private readonly VideoContext database;
@@ -24,9 +25,25 @@ namespace Filmothek.Controllers
             database = context;
         }
 
+        //returns true if logged in user is a mod
+        private bool ModAuthorization()
+        {
+            string UserName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == UserName)) return true;
+            return false;
+        }
+
+        //returns true if logged in user is a mod and has higher permission level
+        private bool AdminAuthorization()
+        {
+            string UserName = User.Identity.Name;
+            if (database.Moderator.Any(x => x.Login == UserName && x.Rights>2)) return true;
+            return false;
+        }
+
 
         //Registering a new User
-        [HttpPost("register")]
+        [HttpPost("register"), AllowAnonymous]
         public async Task<IActionResult> Register(Account values)
         {
             if (!(database.Customer.Any(y => values.Login == y.Login)) || (!(database.Moderator.Any(y => values.Login == y.Login))))
@@ -47,7 +64,7 @@ namespace Filmothek.Controllers
         }
 
         //Login
-        [HttpPost("login")]
+        [HttpPost("login"), AllowAnonymous]
         public IActionResult Login(Password values)
         {
             //hab nicht verstanden... variable ist username von values vom file Password :D
@@ -105,12 +122,14 @@ namespace Filmothek.Controllers
         {
             string UserName = User.Identity.Name;
             var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            if (findUser == null) return NoContent();
             User info = new User(findUser);
             return Ok(info);
         }
         [HttpGet("user/{id}")]
         public IActionResult UserById(int id)
         {
+            if (!ModAuthorization()) return Unauthorized();
             var findUser = database.Customer.FirstOrDefault(x => x.Id == id);
             User user = new User(findUser);
             return Ok(user);
@@ -120,6 +139,7 @@ namespace Filmothek.Controllers
         [HttpGet("allUsers")]
         public IActionResult GetAllUsers()
         {
+            if (!ModAuthorization()) return Unauthorized();
             var Customers = database.Customer.ToList();
             List<User> Users = new List<User>();
             for(int i=0;i<Customers.Count;i++)
@@ -133,6 +153,7 @@ namespace Filmothek.Controllers
         [HttpGet("allAdmins")]
         public IActionResult GetAllAdmins()
         {
+            if (!AdminAuthorization()) return Unauthorized();
             var Admins = database.Moderator.ToList();
             List<User> Users = new List<User>();
             for (int i = 0; i < Admins.Count; i++)
@@ -163,6 +184,7 @@ namespace Filmothek.Controllers
         [HttpPost("editUserAdmin")]
         public async Task<IActionResult> EditForeignUserData(User user)
         {
+            if (!ModAuthorization()) return Unauthorized();
             var databaseEntry = database.Customer.FirstOrDefault(x => x.Id == user.Id);
             databaseEntry.LastName = user.LastName;
             databaseEntry.FirstName = user.FirstName;
@@ -174,7 +196,7 @@ namespace Filmothek.Controllers
         }
 
         //get List of all movies
-        [HttpGet("movies")]
+        [HttpGet("movies"), AllowAnonymous]
         public List<Movie> Movies() => database.Movie.ToList();
 
         //get single movie by ID
@@ -193,6 +215,7 @@ namespace Filmothek.Controllers
         [HttpPost("addMovie")]
         public async Task<IActionResult> AddMovie(Movie mDetails)
         {
+
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName))
             {
@@ -395,6 +418,7 @@ namespace Filmothek.Controllers
         {
             string UserName = User.Identity.Name;
             var FindUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
+            if (FindUser == null) return NoContent();
             var MovieEntries = database.CustomerHistory.Where(a => a.CustomerId == FindUser.Id && a.MovieId == id).FirstOrDefault();
             bool available = false;
             if (database.CustomerHistory.Any(x => x.IsBorrowing == true && x.MovieId == id))
@@ -516,6 +540,7 @@ namespace Filmothek.Controllers
         [HttpGet("history/{id}")]
         public IActionResult GetCustomerHistoryById(int id)
         {
+            if (!ModAuthorization()) return Unauthorized();
             var findHistory = database.CustomerHistory.Where(x => id == x.CustomerId || x.IsBorrowing == true).ToList();
             if (findHistory == null) return NoContent();
             List<CustomerHistorymask> History = new List<CustomerHistorymask>(findHistory.Count);
@@ -538,8 +563,8 @@ namespace Filmothek.Controllers
         public ActionResult Payment()
         {
             string UserName = User.Identity.Name;
-            Customer findPayment = new Customer();
             var findCustomer = database.Customer.Where(y => UserName == y.Login).FirstOrDefault();
+            if (findCustomer == null) return NoContent();
             PaymentMask findPaymentdata = new PaymentMask();
             var findPaymentList = database.PaymentMethod.Where(y => findCustomer.Id == y.CustomerId).FirstOrDefault();
             findPaymentdata.fromPaymentMethod(findPaymentList);
