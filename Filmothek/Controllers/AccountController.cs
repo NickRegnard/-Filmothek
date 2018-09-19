@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Filmothek.Controllers
@@ -39,6 +40,18 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName && x.Rights>2)) return true;
             return false;
+        }
+
+        //writes the log Entry for a admin action, save or discard pending database changes before calling
+        private async void LogAction(string action, int editedId, string editedName)
+        {
+            string editor = User.Identity.Name;
+            ModeratorHistory newActivity = new ModeratorHistory();
+            newActivity.ModeratorId = database.Moderator.FirstOrDefault(x => x.Login == editor).Id; 
+            newActivity.Activity = String.Format("Admin {0} "+action+" with Id '{1}' and name '{2}' on {3} .", editor, editedId, editedName, DateTime.Now);
+            newActivity.Date = DateTime.Now;
+            database.ModeratorHistory.Add(newActivity);
+            await database.SaveChangesAsync();
         }
 
 
@@ -312,32 +325,6 @@ namespace Filmothek.Controllers
             return Ok(database.ModeratorHistory.Where(x => x.ModeratorId == id).ToList());
         }
 
-        //create new mod
-        [HttpPost("registerMod")]
-        public async Task<IActionResult> RegisterModerator(Account values)
-        {
-            string modName = User.Identity.Name;
-            if (database.Moderator.Any(x => x.Login == modName && database.Moderator.Any(y => y.Rights == 3)))
-            {
-                if (!(database.Customer.Any(y => values.Login == y.Login)) || (!(database.Moderator.Any(y => values.Login == y.Login))))
-                {
-                    var newUser = new Moderator()
-                    {
-                        LastName = values.LastName,
-                        FirstName = values.FirstName,
-                        Address = values.Address,
-                        Login = values.Login,
-                        Pw = values.Pw,
-                        Rights = 2
-                    };
-                    database.Moderator.Add(newUser);
-                    await database.SaveChangesAsync();
-                }
-                return NoContent();
-            }
-            return Unauthorized();
-        }
-
         //edit a mod
         [HttpPut("editAdmin")]
         public async Task<IActionResult> EditModerator(Moderator user)
@@ -345,13 +332,7 @@ namespace Filmothek.Controllers
             string modLogin = User.Identity.Name;
             if (modLogin == null) return Unauthorized();
             if (database.Moderator.Any(x => x.Login == modLogin && x.Rights == 3))
-            {
-                /*var findUser = database.Moderator.Where(a => a.Id == user.Id).FirstOrDefault();
-                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
-                findUser = user;
-                database.Moderator.Update(findUser);
-                await database.SaveChangesAsync();*/                
-
+            {          
                 var databaseEntry = database.Moderator.FirstOrDefault(x => x.Id == user.Id);
                 if (database == null) return NotFound();
                 databaseEntry.LastName = user.LastName;
@@ -361,19 +342,25 @@ namespace Filmothek.Controllers
                 databaseEntry.Rights = user.Rights;
                 database.Moderator.Update(databaseEntry);
                 await database.SaveChangesAsync();
-
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = 1;
-                newActivity.Activity = String.Format("Admin '{0}' edited admin with Id '{1}' and username {2} on {3}", modLogin, databaseEntry.Id, databaseEntry.Login, DateTime.Now);
-                newActivity.Date = DateTime.Now;
-                database.ModeratorHistory.Update(newActivity);
-                await database.SaveChangesAsync();
+                Thread.Sleep(5000);
+                LogAction("edited an admin", databaseEntry.Id, databaseEntry.Login);
+      
                 return NoContent();
-
-
-
             }
             return Unauthorized();
+        }
+
+        [HttpPost("createAdmin")]
+        public async Task<IActionResult> CreateModerator(Moderator moderator)
+        {
+            if (!AdminAuthorization()) return Unauthorized();
+            database.Moderator.Add(moderator);
+            await database.SaveChangesAsync();
+            Thread.Sleep(5000);
+            LogAction("created an admin", moderator.Id, moderator.Login);
+
+
+            return Ok();
         }
 
         //delete a mod
@@ -383,14 +370,13 @@ namespace Filmothek.Controllers
             string modLogin = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == modLogin && database.Moderator.Any(y => y.Rights == 3)))
             {
-                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
-                var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findModerator.Id;
-                newActivity.Activity = String.Format("Moderator {0} deleted a user with Id {1} and {2} {3} on {4}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
-                newActivity.Date = DateTime.Now;
-                database.Customer.Remove(findUser);
+                var findUser = database.Moderator.FirstOrDefault(a => a.Id == id);
+                if (findUser == null) return NotFound();
+                database.Moderator.Remove(findUser);
                 await database.SaveChangesAsync();
+                Thread.Sleep(5000);
+                LogAction("delete an admin", findUser.Id, findUser.Login);
+                
                 return NoContent();
             }
             return Unauthorized();
@@ -586,8 +572,6 @@ namespace Filmothek.Controllers
                 await database.SaveChangesAsync();
             }
             return NoContent();
-
-
         }
     }
 }
