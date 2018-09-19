@@ -186,6 +186,7 @@ namespace Filmothek.Controllers
         {
             if (!ModAuthorization()) return Unauthorized();
             var databaseEntry = database.Customer.FirstOrDefault(x => x.Id == user.Id);
+            if (database == null) return NoContent();
             databaseEntry.LastName = user.LastName;
             databaseEntry.FirstName = user.FirstName;
             databaseEntry.Login = user.Login;
@@ -276,28 +277,9 @@ namespace Filmothek.Controllers
                 database.Movie.Remove(findMovie);
                 await database.SaveChangesAsync();
                 return NoContent();
-            }
-            return Unauthorized();
-        }
 
-        //edit a customer by a mod
-        [HttpPut("editCusomter/{id}")]
-        public async Task<IActionResult> EditCustomer(Customer cInfo, int id)
-        {
-            string modLogin = User.Identity.Name;
-            if (database.Moderator.Any(x => x.Login == modLogin))
-            {
-                var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
-                var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
-                findUser = cInfo;
-                findUser.Id = id;
-                database.Customer.Update(findUser);
-                await database.SaveChangesAsync();
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findModerator.Id;
-                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
-                newActivity.Date = DateTime.Now;
-                return NoContent();
+
+
             }
             return Unauthorized();
         }
@@ -323,17 +305,11 @@ namespace Filmothek.Controllers
         }
 
         //return full mod log, accesible by admin only
-        [HttpGet("moderatorHistory")]
-        public List<ModeratorHistory> ShowModeratorHistory()
+        [HttpGet("adminHistory/{id}")]
+        public IActionResult ShowModeratorHistory(int id)
         {
-            string modName = User.Identity.Name;
-            if (database.Moderator.Any(x => x.Login == modName && database.Moderator.Any(y => y.Rights == 3)))
-            {
-                var findMod = database.Moderator.Where(a => a.Login == modName).FirstOrDefault();
-                var history = database.ModeratorHistory.Where(x => x.ModeratorId == findMod.Id).ToList();
-                return history;
-            }
-            return new List<ModeratorHistory>();
+            if (!AdminAuthorization()) return Unauthorized();
+            return Ok(database.ModeratorHistory.Where(x => x.ModeratorId == id).ToList());
         }
 
         //create new mod
@@ -363,29 +339,45 @@ namespace Filmothek.Controllers
         }
 
         //edit a mod
-        [HttpPut("editModerator/{id}")]
-        public async Task<IActionResult> EditModerator(Moderator cInfo, int id)
+        [HttpPut("editAdmin")]
+        public async Task<IActionResult> EditModerator(Moderator user)
         {
             string modLogin = User.Identity.Name;
-            if (database.Moderator.Any(x => x.Login == modLogin && database.Moderator.Any(y => y.Rights == 3)))
+            if (modLogin == null) return Unauthorized();
+            if (database.Moderator.Any(x => x.Login == modLogin && x.Rights == 3))
             {
-                var findUser = database.Moderator.Where(a => a.Id == id).FirstOrDefault();
+                /*var findUser = database.Moderator.Where(a => a.Id == user.Id).FirstOrDefault();
                 var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
-                findUser = cInfo;
-                findUser.Id = id;
+                findUser = user;
                 database.Moderator.Update(findUser);
+                await database.SaveChangesAsync();*/                
+
+                var databaseEntry = database.Moderator.FirstOrDefault(x => x.Id == user.Id);
+                if (database == null) return NotFound();
+                databaseEntry.LastName = user.LastName;
+                databaseEntry.FirstName = user.FirstName;
+                databaseEntry.Login = user.Login;
+                databaseEntry.Address = user.Address;
+                databaseEntry.Rights = user.Rights;
+                database.Moderator.Update(databaseEntry);
                 await database.SaveChangesAsync();
+
                 ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findModerator.Id;
-                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
+                newActivity.ModeratorId = 1;
+                newActivity.Activity = String.Format("Admin '{0}' edited admin with Id '{1}' and username {2} on {3}", modLogin, databaseEntry.Id, databaseEntry.Login, DateTime.Now);
                 newActivity.Date = DateTime.Now;
+                database.ModeratorHistory.Update(newActivity);
+                await database.SaveChangesAsync();
                 return NoContent();
+
+
+
             }
             return Unauthorized();
         }
 
         //delete a mod
-        [HttpDelete("deleteModerator/{id}")]
+        [HttpDelete("deleteAdmin/{id}")]
         public async Task<IActionResult> DeleteModerator(int id)
         {
             string modLogin = User.Identity.Name;
@@ -420,6 +412,7 @@ namespace Filmothek.Controllers
             var FindUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
             if (FindUser == null) return NoContent();
             var MovieEntries = database.CustomerHistory.Where(a => a.CustomerId == FindUser.Id && a.MovieId == id).FirstOrDefault();
+            if (MovieEntries == null) return NoContent();
             bool available = false;
             if (database.CustomerHistory.Any(x => x.IsBorrowing == true && x.MovieId == id))
             {
@@ -472,7 +465,6 @@ namespace Filmothek.Controllers
             database.CustomerHistory.Add(newHistory);
             await database.SaveChangesAsync();
             return NoContent();
-
         }
 
         //Customer: delete a wishlist entry
@@ -567,6 +559,7 @@ namespace Filmothek.Controllers
             if (findCustomer == null) return NoContent();
             PaymentMask findPaymentdata = new PaymentMask();
             var findPaymentList = database.PaymentMethod.Where(y => findCustomer.Id == y.CustomerId).FirstOrDefault();
+            if (findPaymentList == null) return NoContent();
             findPaymentdata.fromPaymentMethod(findPaymentList);
             return Ok(findPaymentdata);
         }
