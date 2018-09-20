@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Filmothek.Controllers
 {
-    //edited
+
     [Route("api")]
     [ApiController, Authorize]
     public class AccountController : ControllerBase
@@ -23,8 +23,9 @@ namespace Filmothek.Controllers
 
         public AccountController(VideoContext context)
         {
-            database = context;
+            database = context; 
         }
+
 
         //returns true if logged in user is a mod
         private bool ModAuthorization()
@@ -32,6 +33,8 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName)) return true;
             return false;
+             
+            
         }
 
         //returns true if logged in user is a mod and has higher permission level
@@ -42,8 +45,9 @@ namespace Filmothek.Controllers
             return false;
         }
 
-        //writes the log Entry for a admin action, save or discard pending database changes before calling
-        private async void LogAction(string action, int editedId, string editedName)
+        //writes the log Entry for a admin action
+        //use with await
+        private async Task LogAction(string action, int editedId, string editedName)
         {
             string editor = User.Identity.Name;
             ModeratorHistory newActivity = new ModeratorHistory();
@@ -342,8 +346,7 @@ namespace Filmothek.Controllers
                 databaseEntry.Rights = user.Rights;
                 database.Moderator.Update(databaseEntry);
                 await database.SaveChangesAsync();
-                Thread.Sleep(5000);
-                LogAction("edited an admin", databaseEntry.Id, databaseEntry.Login);
+                await LogAction("edited an admin", databaseEntry.Id, databaseEntry.Login);
       
                 return NoContent();
             }
@@ -356,8 +359,7 @@ namespace Filmothek.Controllers
             if (!AdminAuthorization()) return Unauthorized();
             database.Moderator.Add(moderator);
             await database.SaveChangesAsync();
-            Thread.Sleep(5000);
-            LogAction("created an admin", moderator.Id, moderator.Login);
+            await LogAction("created an admin", moderator.Id, moderator.Login);
 
 
             return Ok();
@@ -374,8 +376,7 @@ namespace Filmothek.Controllers
                 if (findUser == null) return NotFound();
                 database.Moderator.Remove(findUser);
                 await database.SaveChangesAsync();
-                Thread.Sleep(5000);
-                LogAction("delete an admin", findUser.Id, findUser.Login);
+                await LogAction("delete an admin", findUser.Id, findUser.Login);
                 
                 return NoContent();
             }
