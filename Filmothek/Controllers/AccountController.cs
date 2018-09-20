@@ -11,6 +11,10 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Data;
+using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Filmothek.Controllers
 {
@@ -25,7 +29,7 @@ namespace Filmothek.Controllers
         {
             database = context; 
         }
-
+        
 
         //returns true if logged in user is a mod
         private bool ModAuthorization()
@@ -33,8 +37,6 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName)) return true;
             return false;
-             
-            
         }
 
         //returns true if logged in user is a mod and has higher permission level
@@ -217,6 +219,57 @@ namespace Filmothek.Controllers
         [HttpGet("movies"), AllowAnonymous]
         public List<Movie> Movies() => database.Movie.ToList();
 
+        [HttpGet("movies/{searchParam}/{column}/{pageNumber}/{itemsPerPage}/{sortKey}/{sortOrder}"), AllowAnonymous]
+        public IActionResult GetMovies(string searchParam, string column, int pageNumber, int itemsPerPage, string sortKey, string sortOrder)
+        {
+            if (searchParam == null || column == null || pageNumber == 0 || itemsPerPage == 0 || sortKey == null || sortOrder == null) return BadRequest();
+
+            //sanitizing Inputs
+            char[] Sanitizer = searchParam.ToCharArray();
+            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c));
+            searchParam = new string(Sanitizer);
+
+            Sanitizer = column.ToCharArray();
+            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c));
+            column = new string(Sanitizer);
+
+            Sanitizer = sortKey.ToCharArray();
+            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c));
+            sortKey = new string(Sanitizer);
+
+            Sanitizer = sortOrder.ToCharArray();
+            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c));
+            sortOrder = new string(Sanitizer);
+
+            //alternative to Sanitizing, but apparently slower?
+            /*
+            Regex sanitizer = new Regex("[A-Za-z0-9]");
+            searchParam = sanitizer.Replace(searchParam, "");
+            column = sanitizer.Replace(column, "");
+            sortKey = sanitizer.Replace(sortKey, "");
+            sortOrder = sortOrder.Replace(sortOrder, "");
+            */
+
+#pragma warning disable EF1000 // Possible SQL injection vulnerability.
+            var result = database.Movie.FromSql("" +
+                "SELECT * FROM Movie " +
+                "WHERE " + column + " " +
+                "LIKE '%" + searchParam + "%' " +
+                "ORDER BY " + sortKey + " " + sortOrder)
+#pragma warning restore EF1000 // Possible SQL injection vulnerability.
+                .ToList();
+            int hits = result.Count;
+            result = result.Skip((pageNumber - 1) * itemsPerPage)
+                .Take(itemsPerPage)
+                .ToList();
+
+            MovieListData returnValue = new MovieListData(result, hits);
+
+            return Ok(returnValue);
+        }
+
+
+
         //get single movie by ID
         [HttpGet("movie/{id}")]
         public ActionResult<Movie> GetById(int id)
@@ -285,18 +338,11 @@ namespace Filmothek.Controllers
             string UserName = User.Identity.Name;
             if (database.Moderator.Any(x => x.Login == UserName))
             {
-                var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
                 var findMovie = await database.Movie.FindAsync(id);
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findUser.Id;
-                newActivity.Activity = String.Format("Moderator {0} deleted a movie with Id {1} and {2} on {3}.", findUser.Login, findMovie.Id, findMovie.MovieName, DateTime.Now);
-                newActivity.Date = DateTime.Now;
+                await LogAction("deleted a Movie with", findMovie.Id, findMovie.MovieName);
                 database.Movie.Remove(findMovie);
                 await database.SaveChangesAsync();
                 return NoContent();
-
-
-
             }
             return Unauthorized();
         }
