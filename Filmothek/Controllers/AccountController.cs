@@ -293,16 +293,9 @@ namespace Filmothek.Controllers
                 var findUser = database.Moderator.Where(a => a.Login == UserName).FirstOrDefault();
                 if (!(database.Movie.Any(x => x == mDetails)))
                 {
-                    Movie newMovie = new Movie();
-                    newMovie = mDetails;
-                    //ModeratorHistory newActivity = new ModeratorHistory();
-                    //newActivity.ModeratorId = findUser.Id;
-                    //newActivity.Activity = String.Format("Moderator {0} added a new movie with Id {1} and {2} on {3}.", findUser.Login, newMovie.Id, newMovie.MovieName, DateTime.Now);
-                    //newActivity.Date = DateTime.Now;
-                    database.Movie.Add(newMovie);
+                    await LogAction("added a new Movie", mDetails.Id, mDetails.MovieName);
+                    database.Movie.Add(mDetails);
                     await database.SaveChangesAsync();
-                    //database.ModeratorHistory.Add(newActivity);
-                    //await database.SaveChangesAsync();
                 }
                 return NoContent();
             }
