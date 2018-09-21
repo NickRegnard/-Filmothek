@@ -205,6 +205,7 @@ namespace Filmothek.Controllers
             if (!ModAuthorization()) return Unauthorized();
             Customer UserEntry = database.Customer.FirstOrDefault(x => x.Id == id);
             if (UserEntry == null) return NotFound();
+
             //create the random new PW
             char[] chars = new char[62];
             chars ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
@@ -219,16 +220,43 @@ namespace Filmothek.Controllers
             {
                 result.Append(chars[b % (chars.Length)]);
             }
-            string key = result.ToString();
 
-            UserEntry.Pw = key;
-            await LogAction("reset the password of user", UserEntry.Id, UserEntry.Login);
+            UserEntry.Pw = result.ToString();
+            await LogAction("reset the password of an user", UserEntry.Id, UserEntry.Login);
             database.Update(UserEntry);
             await database.SaveChangesAsync();
-            key = JsonConvert.SerializeObject(key);
-            return  Ok(key); // stupid but we have to return know it somehow for now
+            return  Ok(JsonConvert.SerializeObject(result.ToString())); // stupid but we have to return to know it somehow for now
         }
 
+        [HttpPost("resetAdminPw")]
+        public async Task<IActionResult> ResetAdminPassword([FromBody]int id)
+        {
+            if (!AdminAuthorization()) return Unauthorized();
+            Moderator UserEntry = database.Moderator.FirstOrDefault(x => x.Id == id);
+            if (UserEntry == null) return NotFound();
+
+            //create the random new PW
+            char[] chars = new char[62];
+            chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
+            byte[] data;
+            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            {
+                data = new byte[10];
+                crypto.GetBytes(data);
+            }
+            StringBuilder result = new StringBuilder(10);
+            foreach (byte b in data)
+            {
+                result.Append(chars[b % (chars.Length)]);
+            }
+            string key = result.ToString();
+
+            UserEntry.Pw = result.ToString();
+            await LogAction("reset the password of an admin", UserEntry.Id, UserEntry.Login);
+            database.Update(UserEntry);
+            await database.SaveChangesAsync();
+            return Ok(JsonConvert.SerializeObject(result.ToString())); // stupid but we have to return to know it somehow for now
+        }
 
         [HttpPost("editUserAdmin")]
         public async Task<IActionResult> EditForeignUserData(User user)
@@ -241,6 +269,7 @@ namespace Filmothek.Controllers
             databaseEntry.Login = user.Login;
             databaseEntry.Address = user.Address;
             database.Customer.Update(databaseEntry);
+            await LogAction("edited the data of a user", databaseEntry.Id, databaseEntry.Login);
             await database.SaveChangesAsync();
             return Ok();
         }
@@ -256,7 +285,7 @@ namespace Filmothek.Controllers
 
             //sanitizing Inputs
             char[] Sanitizer = searchParam.ToCharArray();
-            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c));
+            Sanitizer = Array.FindAll<char>(Sanitizer, c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c));
             searchParam = new string(Sanitizer);
 
             Sanitizer = column.ToCharArray();
@@ -345,10 +374,7 @@ namespace Filmothek.Controllers
                 findMovie.Id = id;
                 database.Movie.Update(findMovie);
                 await database.SaveChangesAsync();
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findUser.Id;
-                newActivity.Activity = String.Format("Moderator {0} edited a movie with Id {1} and {2} on {3}.", findUser.Login, findMovie.Id, findMovie.MovieName, DateTime.Now);
-                newActivity.Date = DateTime.Now;
+                await LogAction("edited a Movie with", findMovie.Id, findMovie.MovieName);
                 return NoContent();
             }
             return Unauthorized();
@@ -379,10 +405,7 @@ namespace Filmothek.Controllers
             {
                 var findModerator = database.Moderator.Where(a => a.Login == modLogin).FirstOrDefault();
                 var findUser = database.Customer.Where(a => a.Id == id).FirstOrDefault();
-                ModeratorHistory newActivity = new ModeratorHistory();
-                newActivity.ModeratorId = findModerator.Id;
-                newActivity.Activity = String.Format("Moderator {0} deleted a user with Id {1} and {2} {3} on {4}.", findModerator.Login, findUser.Id, findUser.FirstName, findUser.LastName, DateTime.Now);
-                newActivity.Date = DateTime.Now;
+                await LogAction("deleted a Customer with", findUser.Id, findUser.Login);
                 database.Customer.Remove(findUser);
                 await database.SaveChangesAsync();
                 return RedirectToAction();
