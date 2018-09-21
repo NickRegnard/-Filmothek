@@ -15,6 +15,8 @@ using System.Data;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using Newtonsoft.Json;
 
 namespace Filmothek.Controllers
 {
@@ -184,21 +186,49 @@ namespace Filmothek.Controllers
         }
 
         //edit PW and Address of user
-        [HttpPost("edituser")]
-        public async Task<IActionResult> EditUserdataAsync(string password, string address)
+        //abuse of password Model. .password = new, .username = old
+        [HttpPost("editPW")]
+        public async Task<IActionResult> EditUserdataAsync([FromBody]Password password)
         {
             string UserName = User.Identity.Name;
             var findUser = database.Customer.Where(a => a.Login == UserName).FirstOrDefault();
-            var info = new Customer();
-            info.Id = findUser.Id;
-            if (password != "")
-                info.Pw = password;
-            if (address != "")
-                info.Address = address;
-            database.Customer.Update(info);
+            if (findUser.Pw != password.username) return Unauthorized();
+            findUser.Pw = password.password;
+            database.Customer.Update(findUser);
             await database.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpPost("resetPw")]
+        public async Task<IActionResult> ResetPassword([FromBody]int id)
+        {
+            if (!ModAuthorization()) return Unauthorized();
+            Customer UserEntry = database.Customer.FirstOrDefault(x => x.Id == id);
+            if (UserEntry == null) return NotFound();
+            //create the random new PW
+            char[] chars = new char[62];
+            chars ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
+            byte[] data;
+            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            {
+                data = new byte[10];
+                crypto.GetBytes(data);
+            }
+            StringBuilder result = new StringBuilder(10);
+            foreach (byte b in data)
+            {
+                result.Append(chars[b % (chars.Length)]);
+            }
+            string key = result.ToString();
+
+            UserEntry.Pw = key;
+            await LogAction("reset the password of user", UserEntry.Id, UserEntry.Login);
+            database.Update(UserEntry);
+            await database.SaveChangesAsync();
+            key = JsonConvert.SerializeObject(key);
+            return  Ok(key); // stupid but we have to return know it somehow for now
+        }
+
 
         [HttpPost("editUserAdmin")]
         public async Task<IActionResult> EditForeignUserData(User user)
